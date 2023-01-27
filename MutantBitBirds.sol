@@ -25,6 +25,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	string private _contractUri = "https://rubykitties.tk/contract";
     string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
 	string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
+    string[] private _traitNames = ["tr-0", "tr-1", "tr-2", "tr-3", "tr-4", "tr-5", "tr-6", "tr-7"];
     uint256 private immutable TRAIT_MASK = 255;
 	uint256 private _maxTotalSupply = 3000; 
 	uint256 private _currentReserveSupply = 300;        
@@ -36,7 +37,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     constructor() ERC721("MutantBitBirds", "MTB") {
 	
 		_setDefaultRoyalty(msg.sender, 1000);
-	    reserveMint(msg.sender);
+	    reserveMint(msg.sender, 1);
 	}
 
     // Opensea json metadata format interface
@@ -57,18 +58,22 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		//setRoyalties(tokenId, owner(), 1000);
     }	
 
-    function reserveMint(address to) public onlyOwner {
-        require(_currentReserveSupply > 0, "no reserve");
-        _currentReserveSupply = _currentReserveSupply -1;
-		internalMint(to);
+    function reserveMint(address to, uint quantity) public onlyOwner {
+        require(quantity > 0, "cannot be zero");
+        require(_currentReserveSupply > quantity, "no reserve");
+        _currentReserveSupply = _currentReserveSupply -quantity;
+        for (uint i = 0; i < quantity; i++) 
+		    internalMint(to);
     }
 	
-	function publicMintEth() external payable {
+	function publicMint(uint quantity) external payable {
+        require(quantity > 0, "cannot be zero");
 		require(msg.sender == tx.origin, "no bots");
-		require(msg.value == _mintTokenPriceEth, "wrong price");		
-		require(_tokenIdCounter.current() < _maxTotalSupply, "max supply");	
-		require(balanceOf(msg.sender) < _mintMaxTotalBalance, "too many");
-		internalMint(msg.sender);	
+		require(msg.value == quantity * _mintTokenPriceEth, "wrong price");		
+		require(_tokenIdCounter.current() < _maxTotalSupply - quantity, "max supply");	
+		require(balanceOf(msg.sender) + quantity < _mintMaxTotalBalance, "too many");
+        for (uint i = 0; i < quantity; i++) 
+		    internalMint(msg.sender);	
 	}
 				
     function pause() public onlyOwner {
@@ -156,30 +161,37 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	}
     */
 
-	function getTraitValueStr(uint256 tokenId, uint8 traitId) public view returns (string memory ) {
-        return Strings.toString(getTraitValue(tokenId, traitId));
+	function getTraitValues(uint256 tokenId) internal view returns (uint8[] memory ) {
+        require(_exists(tokenId), "token err");
+        uint256 oldvalue = _tokenIdDNA[tokenId];
+        uint8[] memory traits = new uint8[](8);
+        for (uint i = 0; i < 8; i++) 
+        {
+            uint256 bitMask = TRAIT_MASK << (8 * i);
+            uint256 value = (oldvalue & bitMask) >> (8 * i); 
+            traits[i] = uint8(value);           
+        }     
+        return traits;   
     }
 
 	function getTraitValue(uint256 tokenId, uint8 traitId) public view returns (uint8 ) {
         require (traitId < 8, "trait err");
         require(_exists(tokenId), "token err");
-        uint256 bitMask = TRAIT_MASK << (8 * traitId);
-        uint256 value = (_tokenIdDNA[tokenId] & bitMask); 
-        uint8 value8 = uint8(value >> (8 * traitId)); 
-		return value8;
+		return getTraitValues(tokenId)[traitId];
 	}
 
 	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) public {
         require (traitId < 8, "trait err");
         require(_exists(tokenId), "token err");
-        uint256 newvalue = traitValue << (8 *traitId);
+        uint256 newvalue = traitValue;
+        newvalue = newvalue << (8 *traitId);
         uint256 oldvalue = _tokenIdDNA[tokenId];
         for (uint i = 0; i < 8; i++) 
         {
             if (i != traitId)
             {
                 uint256 bitMask = TRAIT_MASK << (8 * i);
-                uint256 value = (oldvalue & bitMask) >> (8 * i); 
+                uint256 value = (oldvalue & bitMask); 
                 newvalue |= value;
             }
         }
@@ -193,22 +205,23 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return string(abi.encodePacked(_baseRevealedUri, tokenId.toString(), ".png"));
 	}		
 	
-	function generateCharacter(uint256 tokenId) public view returns(string memory){
-
-		bytes memory svg = abi.encodePacked(
-			'<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
+	function generateCharacter(uint256 tokenId) public view returns(bytes memory){
+ 		bytes memory svg = bytes.concat(
+			'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 250 250">',
 			'<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
 			'<rect width="100%" height="100%" fill="black" />',
-			'<text x="50%" y="50%" class="base" dominant-baseline="middle" text-anchor="middle">', "Trait-0: ", getTraitValueStr(tokenId, 0),'</text>',
-			'<image x="0" y="0" width="100" height="100" xlink:href="', getImages(tokenId), '" />',
+			'<text x="50%" y="50%" class="base" dominant-baseline="middle" text-anchor="middle">', 
+            getTraitText(tokenId),        
+            '</text>',
+			'<image x="0" y="0" width="100" height="100" xlink:href="', 
+            bytes(getImages(tokenId)), 
+            '" />',
 			'</svg>'
 		);
-		return string(
-			abi.encodePacked(
+		return bytes.concat(
 				"data:image/svg+xml;base64,",
-				Base64.encode(svg)
-			)    
-		);
+				bytes(Base64.encode(svg))
+                );
 	}
 	
     function tokenURI(uint256 tokenId)
@@ -221,36 +234,82 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return getTokenURI(tokenId);
     }	
 	
-	function getTraitAttributes(uint256 tokenId) public view returns (string memory) {
-        string memory attribs;
-        for (uint8 i = 0; i < 8; i++) 
-        {
-            string memory attrib = "{\"trait_type\": \"trait-";
-            attrib = string.concat(attrib, Strings.toString(i));
-            attrib = string.concat(attrib, "\",\"value\": \"");
-            attrib = string.concat(attrib, getTraitValueStr(tokenId, i));
-            attrib = string.concat(attrib, "\"},");              
-            attribs = string.concat(attribs,attrib);
-        }
-        return attribs;
+    function getTraitAttributesTType(uint8 traitId, uint8 traitVal) internal view returns (bytes memory) {
+        return bytes.concat("{\"trait_type\": \"", bytes(_traitNames[traitId]), "\",\"value\": \"", bytes(Strings.toString(traitVal)), "\"},");
     }
 
-    function getTokenURI(uint256 tokenId) internal view returns (string memory)
-	{
-		bytes memory dataURI = abi.encodePacked(
+	function getTraitAttributes(uint256 tokenId) internal view returns (bytes memory) {
+        uint8[] memory traits = getTraitValues(tokenId);     
+        /*string memory attribs;
+        for (uint8 i = 0; i < 8; i++) 
+        {
+            attribs = string.concat(attribs, getTraitAttributesTType(i, traits[i]));                        
+        }
+        return attribs;*/
+        return 
+			bytes.concat(
+				getTraitAttributesTType(0, traits[0]),
+				getTraitAttributesTType(1, traits[1]),
+                getTraitAttributesTType(2, traits[2]),
+                getTraitAttributesTType(3, traits[3]),
+                getTraitAttributesTType(4, traits[4]),
+                getTraitAttributesTType(5, traits[5]),
+                getTraitAttributesTType(6, traits[6]),
+                getTraitAttributesTType(7, traits[7])
+			);	        
+    }
+	
+    function getTraitTextTSpan(uint8 traitId, uint8 traitVal) internal view returns (bytes memory) {
+        return bytes.concat("<tspan x=\"50%\" dy=\"15\">", bytes(_traitNames[traitId]), ": ", bytes(Strings.toString(traitVal)), "</tspan>");
+    }
+
+	function getTraitText(uint256 tokenId) internal view returns (bytes memory) {
+        uint8[] memory traits = getTraitValues(tokenId);        
+        /*string memory attribs;
+        for (uint8 i = 0; i < 8; i++) 
+        {
+            attribs = string.concat(attribs, getTraitTextTSpan(i, traits[i]));
+        }
+        return attribs;*/
+        return 
+			bytes.concat(
+				getTraitTextTSpan(0, traits[0]),
+				getTraitTextTSpan(1, traits[1]),
+                getTraitTextTSpan(2, traits[2]),
+                getTraitTextTSpan(3, traits[3]),
+                getTraitTextTSpan(4, traits[4]),
+                getTraitTextTSpan(5, traits[5]),
+                getTraitTextTSpan(6, traits[6]),
+                getTraitTextTSpan(7, traits[7])
+			);	                     
+    }    
+
+   function getTokenURImeta(uint256 tokenId) public view returns (bytes memory)
+	{     
+		bytes memory dataURI = bytes.concat(
 			'{'
-				'"name": "MutantBitBird #', tokenId.toString(), '",'
+				'"name": "MutantBitBird #', 
+                bytes(tokenId.toString()), 
+                '",'
 				'"description": "MutantBitBirds, Earn and Mutate",'
-				'"image": "', generateCharacter(tokenId), '",'
-				'"attributes": [', getTraitAttributes(tokenId), '],'
+				'"image": "', 
+                generateCharacter(tokenId), 
+                '",'
+				'"attributes": [', 
+                    getTraitAttributes(tokenId),
+                ']'
 			'}'
 		);
+        return dataURI;	
+    }
+
+    function getTokenURI(uint256 tokenId) public view returns (string memory)
+	{       
 		return string(
-			abi.encodePacked(
+			bytes.concat(
 				"data:application/json;base64,",
-				Base64.encode(dataURI)
-			)
-		);		
+				bytes(Base64.encode(getTokenURImeta(tokenId)))
+			));	
     }
 	
 	  function walletOf(address wladdress)
