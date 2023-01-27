@@ -36,7 +36,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     constructor() ERC721("MutantBitBirds", "MTB") {
 	
 		_setDefaultRoyalty(msg.sender, 1000);
-	
+	    reserveMint(msg.sender);
 	}
 
     // Opensea json metadata format interface
@@ -148,7 +148,6 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 
 	/*
     function incTraitValue(uint256 tokenId, uint8 traitId) public {
-        require (traitId > 0, "trait err");
         require (traitId < 8, "trait err");        
 		require(_exists(tokenId), "token err");
 		require(ownerOf(tokenId) == msg.sender, "no owner");
@@ -162,7 +161,6 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     }
 
 	function getTraitValue(uint256 tokenId, uint8 traitId) public view returns (uint8 ) {
-        require (traitId > 0, "trait err");
         require (traitId < 8, "trait err");
         require(_exists(tokenId), "token err");
         uint256 bitMask = TRAIT_MASK << (8 * traitId);
@@ -171,8 +169,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return value8;
 	}
 
-	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) internal {
-        require (traitId > 0, "trait err");
+	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) public {
         require (traitId < 8, "trait err");
         require(_exists(tokenId), "token err");
         uint256 newvalue = traitValue << (8 *traitId);
@@ -224,7 +221,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return getTokenURI(tokenId);
     }	
 	
-	function getTraitAttributes(uint256 tokenId) internal view returns (string memory) {
+	function getTraitAttributes(uint256 tokenId) public view returns (string memory) {
         string memory attribs;
         for (uint8 i = 0; i < 8; i++) 
         {
@@ -243,7 +240,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		bytes memory dataURI = abi.encodePacked(
 			'{'
 				'"name": "MutantBitBird #', tokenId.toString(), '",'
-				'"description": "MutantBitBirds Stake, Earn and Mutate",'
+				'"description": "MutantBitBirds, Earn and Mutate",'
 				'"image": "', generateCharacter(tokenId), '",'
 				'"attributes": [', getTraitAttributes(tokenId), '],'
 			'}'
