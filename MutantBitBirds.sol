@@ -23,19 +23,46 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     Counters.Counter private _tokenIdCounter;
     mapping(uint256 => uint256) public _tokenIdDNA;	
 	string private _contractUri = "https://rubykitties.tk/contract";
-    string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
-	string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
+    //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
+	//string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
     string[] private _traitNames = ["tr-0", "tr-1", "tr-2", "tr-3", "tr-4", "tr-5", "tr-6", "tr-7"];
     uint256 private immutable TRAIT_MASK = 255;
-	uint256 private _maxTotalSupply = 3000; 
-	uint256 private _currentReserveSupply = 300;        
+	uint256 private _maxTotalSupply; 
+	uint256 private _currentReserveSupply;        
 	uint256 private _mintMaxTotalBalance = 5;
 	uint256 private _mintTokenPriceEth = 50000000000000000; // 0.050 ETH
-	bool _revealed = false;
+	//bool _revealed = false;
 	bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
+    /*
+    <?xml version="1.0"?>
+    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="24" height="24" fill="white" />
+    <polyline points="8,23 8,19 7,18 6,17 6,9 7,8 7,7 8,6 9,5 10,5 11,4 12,4 13,5 14,6 15,7 15,18 14,19 13,20 13,23" stroke="black" />
+    <polyline points="8,23 8,19 7,18 6,17 6,9 7,8 7,7 8,6 9,5 10,5 11,4 12,4 13,5 14,6 15,7 15,18 14,19 13,20 13,23" fill="pink" />
+    <polyline points="9,23 9,18 10,17 11,16 15,14 15,17 15,18 14,19 13,20 13,23" fill="blue" /> 
+    <polyline points="12,13 17,13 18,14 18,18 17,17 12,17" stroke="black" /> 
+    <polyline points="12,13 17,13 18,14 18,18 17,17 12,17" fill="gold" />
+    <rect x="10" y="10" width="2" height="2" fill="white" />
+    <rect x="13" y="10" width="2" height="2" fill="white" /> 
+    <rect x="10" y="11" width="1" height="1" fill="red" />
+    <rect x="13" y="11" width="1" height="1" fill="red" /> 
+    </svg>
+    */
+    string private  poly_marker_open = "<polyline points=";
+    string private  poly_marker_fill = " fill=\"";
+    string private  poly_marker_stroke = " stroke=\"black";
+    string private  poly_marker_close = "\" />";    
+    string private  basic_bird_shape_poly = "\"8,23 8,19 7,18 6,17 6,9 7,8 7,7 8,6 9,5 10,5 11,4 12,4 13,5 14,6 15,7 15,18 14,19 13,20 13,23\"";
+    string private  basic_bird_throat_poly = "\"9,23 9,18 10,17 11,16 15,14 15,17 15,18 14,19 13,20 13,23\"";
+    string private  basic_bird_beak_poly = "\"12,13 17,13 18,14 18,18 17,17 12,17\"";
+    string private  eyes_poly = "<rect x=\"10\" y=\"10\" width=\"2\" height=\"2\" fill=\"white\" /><rect x=\"13\" y=\"10\" width=\"2\" height=\"2\" fill=\"white\" />";
+    string private  eyes_dot = "<rect x=\"10\" y=\"11\" width=\"1\" height=\"1\" fill=\"black\" /><rect x=\"13\" y=\"11\" width=\"1\" height=\"1\" fill=\"black\" />";
+     
 
-    constructor() ERC721("MutantBitBirds", "MTB") {
-	
+    constructor(uint256 maxTotalSupply, uint256 reserveSupply) ERC721("MutantBitBirds", "MTB") {
+        require(maxTotalSupply > 0, "err supply");
+	    require(reserveSupply < maxTotalSupply, "err reserve");
+        _maxTotalSupply = maxTotalSupply;
+        _currentReserveSupply = reserveSupply;
 		_setDefaultRoyalty(msg.sender, 1000);
 	    reserveMint(msg.sender, 1);
 	}
@@ -60,7 +87,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 
     function reserveMint(address to, uint quantity) public onlyOwner {
         require(quantity > 0, "cannot be zero");
-        require(_currentReserveSupply > quantity, "no reserve");
+        require(_currentReserveSupply >= quantity, "no reserve");
         _currentReserveSupply = _currentReserveSupply -quantity;
         for (uint i = 0; i < quantity; i++) 
 		    internalMint(to);
@@ -100,6 +127,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		_burn(tokenId);
 	}		
 	
+    /*
 	function setBaseRevealedUri(string calldata baseUri) external onlyOwner() {
 		_baseRevealedUri = baseUri;
 	}
@@ -107,6 +135,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	function setBaseNotRevealedUri(string calldata baseUri) external onlyOwner() {
 		_baseNotRevealedUri = baseUri;
 	}	
+    */
 
 	function setTokenPriceEth(uint256 tokenPriceEth) external onlyOwner() {
 		_mintTokenPriceEth = tokenPriceEth;
@@ -116,9 +145,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return _mintTokenPriceEth.toString();
 	}	
 
+    /*
 	function setMaxTotalSupply(uint256 maxTotalSupply) external onlyOwner() {
 		_maxTotalSupply = maxTotalSupply;
 	}
+    */
 
     function getCurrentReserveSupply() public view returns (string memory){
         return _currentReserveSupply.toString();
@@ -198,16 +229,42 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         _tokenIdDNA[tokenId] = newvalue;        
 	}	    	
 	
-	function getImages(uint256 tokenId) public view returns (string memory) {
+	/*
+    function getImages(uint256 tokenId) public view returns (string memory) {
 		if(_revealed == false) {
 			return string(abi.encodePacked(_baseNotRevealedUri, tokenId.toString(), ".png"));
 		}	
 		return string(abi.encodePacked(_baseRevealedUri, tokenId.toString(), ".png"));
-	}		
-	
+	}
+    */		
+
+    function getBasicBirdBody(string memory body) public view returns (bytes memory) {
+        return bytes.concat(
+            bytes(poly_marker_open), bytes(basic_bird_shape_poly), bytes(poly_marker_stroke), bytes(poly_marker_close),
+            bytes(poly_marker_open), bytes(basic_bird_shape_poly), bytes(poly_marker_fill), bytes(body), bytes(poly_marker_close)
+        );
+    } 
+    
+    function getBasicBirdThroat(string memory throat) public view returns (bytes memory) {
+        return bytes.concat(
+            bytes(poly_marker_open), bytes(basic_bird_throat_poly), bytes(poly_marker_fill), bytes(throat), bytes(poly_marker_close)
+        );
+    } 
+   
+   function getBasicBirdBeak( string memory beak) public view returns (bytes memory) {
+        return bytes.concat(
+            bytes(poly_marker_open), bytes(basic_bird_beak_poly), bytes(poly_marker_stroke), bytes(poly_marker_close),
+            bytes(poly_marker_open), bytes(basic_bird_beak_poly), bytes(poly_marker_fill), bytes(beak), bytes(poly_marker_close)
+        );
+    }  
+    
+   function getBirdEyes(bool crazy) public view returns (bytes memory) {
+        return bytes.concat(bytes(eyes_poly), bytes(eyes_dot));
+    }        
+
 	function generateCharacter(uint256 tokenId) public view returns(bytes memory){
  		bytes memory svg = bytes.concat(
-			'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 250 250">',
+		/*	'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 250 250">',
 			'<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
 			'<rect width="100%" height="100%" fill="black" />',
 			'<text x="50%" y="50%" class="base" dominant-baseline="middle" text-anchor="middle">', 
@@ -217,6 +274,13 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
             bytes(getImages(tokenId)), 
             '" />',
 			'</svg>'
+        */
+        '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <rect x="0" y="0" width="24" height="24" fill="white" />',
+        bytes(getBasicBirdBody("pink")),
+        bytes(getBasicBirdThroat("blue")),
+        bytes(getBasicBirdBeak("gold")),
+        bytes(getBirdEyes(false)),
+        '</svg>'
 		);
 		return bytes.concat(
 				"data:image/svg+xml;base64,",
@@ -227,11 +291,30 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     function tokenURI(uint256 tokenId)
         public
         view
-        override(ERC721)
+        virtual override(ERC721)
         returns (string memory)
     {
         //return super.tokenURI(tokenId);
-		return getTokenURI(tokenId);
+		bytes memory dataURI = bytes.concat(
+			'{'
+				'"name": "MutantBitBird #', 
+                bytes(tokenId.toString()), 
+                '",'
+				'"description": "MutantBitBirds, Earn and Mutate",'
+				'"image": "', 
+                generateCharacter(tokenId), 
+                '",'
+				'"attributes": [', 
+                    getTraitAttributes(tokenId),
+                ']'
+			'}'
+		);
+        return string(dataURI);	
+		/*return string(
+			bytes.concat(
+				"data:application/json;base64,",
+				bytes(Base64.encode(dataURI))
+			));*/
     }	
 	
     function getTraitAttributesTType(uint8 traitId, uint8 traitVal) internal view returns (bytes memory) {
@@ -284,35 +367,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 			);	                     
     }    
 
-   function getTokenURImeta(uint256 tokenId) public view returns (bytes memory)
-	{     
-		bytes memory dataURI = bytes.concat(
-			'{'
-				'"name": "MutantBitBird #', 
-                bytes(tokenId.toString()), 
-                '",'
-				'"description": "MutantBitBirds, Earn and Mutate",'
-				'"image": "', 
-                generateCharacter(tokenId), 
-                '",'
-				'"attributes": [', 
-                    getTraitAttributes(tokenId),
-                ']'
-			'}'
-		);
-        return dataURI;	
-    }
-
-    function getTokenURI(uint256 tokenId) public view returns (string memory)
-	{       
-		return string(
-			bytes.concat(
-				"data:application/json;base64,",
-				bytes(Base64.encode(getTokenURImeta(tokenId)))
-			));	
-    }
-	
-	  function walletOf(address wladdress)
+	function walletOf(address wladdress)
 		public
 		view
 		returns (uint256[] memory)
@@ -325,9 +380,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return tokenIds;
 	  }
 	  
-	  function reveal() public onlyOwner {
+	  /*
+      function reveal() public onlyOwner {
 		  _revealed = true;
-	  }	  
+	  }	
+    */
 	
     /*
     //configure royalties for Rariable
