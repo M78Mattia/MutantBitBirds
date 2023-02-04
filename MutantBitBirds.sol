@@ -62,12 +62,12 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         bytes memory dataURI = bytes.concat(
         '{',
             '"name": "MutantBitBirds",',
-            '"description": "Earn MutantCawSeeds (MCS) and customize your MutantBitBird !",',
-            '"image": "', 
-            bytes(_contractUri), 
-            '/image.png",',
-            '"external_link": "',
-            bytes(_contractUri),
+            '"description": "Earn MutantCawSeeds (MCS) and customize your MutantBitBirds !",',
+            //'"image": "', 
+            //bytes(_contractUri), 
+            //'/image.png",',
+            //'"external_link": "',
+            //bytes(_contractUri),
             '"',
         '}');
         return string(dataURI);
@@ -83,7 +83,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         uint256 dnabody = ((block.timestamp + block.difficulty) % 255)<<5*8;
-        uint256 dnathroat = ((block.timestamp * block.difficulty) % 255)<<4*8;
+        uint256 dnathroat = ((block.timestamp) % 255)<<4*8;
 		_tokenIdDNA[tokenId] = (dnabody + dnathroat);
 		//setRoyalties(tokenId, owner(), 1000);
     }	
@@ -219,10 +219,16 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(_exists(tokenId), "token err");
 		return getTraitValues(tokenId)[traitId];
 	}
+	function setNickName(uint256 tokenId, string calldata nickname) public {
+        require(_exists(tokenId), "token err");
+        require(ownerOf(tokenId) == msg.sender, "no owner");
+        _tokenIdNickName[tokenId] = nickname;
+    }    
 
 	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) public {
         require (traitId < 8, "trait err");
         require(_exists(tokenId), "token err");
+        require(ownerOf(tokenId) == msg.sender, "no owner");
         uint256 newvalue = traitValue;
         newvalue = newvalue << (8 *traitId);
         uint256 oldvalue = _tokenIdDNA[tokenId];
@@ -327,7 +333,9 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
             '" />',
 			'</svg>'
         */
-        '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <rect x="0" y="0" width="24" height="24" fill="rgb(238,238,238)" />',
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"  preserveAspectRatio="xMinYMin meet">',
+        '<rect x="0" y="0" width="24" height="24" fill="rgb(238,238,238)" />',
         generateCharacterSvg(tokenId),
         '</svg>'
 		);
@@ -458,7 +466,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     */
 	
     /*
-    //configure royalties for Rariable
+    //configure royalties for Rarible
     function setRoyalties(uint _tokenId, address payable _royaltiesRecipientAddress, uint96 _percentageBasisPoints) public onlyOwner {
         LibPart.Part[] memory _royalties = new LibPart.Part[](1);
         _royalties[0].value = _percentageBasisPoints;
