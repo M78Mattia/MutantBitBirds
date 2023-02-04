@@ -58,7 +58,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	}
 
     // Opensea json metadata format interface
-    function contractURI() public view returns (string memory) {
+    function contractURI() public pure returns (string memory) {
         bytes memory dataURI = bytes.concat(
         '{',
             '"name": "MutantBitBirds",',
@@ -334,7 +334,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 			'</svg>'
         */
         '<?xml version="1.0" encoding="UTF-8"?>',
-        '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"  preserveAspectRatio="xMinYMin meet">',
+        '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMinYMin meet">',
         '<rect x="0" y="0" width="24" height="24" fill="rgb(238,238,238)" />',
         generateCharacterSvg(tokenId),
         '</svg>'
@@ -368,12 +368,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
                 ']'
 			'}'
 		);
-        return string(dataURI);	
-		/*return string(
+        return string(
 			bytes.concat(
 				"data:application/json;base64,",
 				bytes(Base64.encode(dataURI))
-			));*/
+		));
     }	
 	
     function getTraitAttributesTType(uint8 traitId, uint8 traitVal) internal pure returns (bytes memory) {
@@ -401,7 +400,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         display = "\"display_type\": \"number\",";
         else
         display = "";                                                   
-        return bytes.concat("{", display, "\"trait_type\": \"", traitName, "\",\"value\": \"", bytes(Strings.toString(traitVal)), "\"},");
+        return bytes.concat("{", display, "\"trait_type\": \"", traitName, "\",\"value\": \"", bytes(Strings.toString(traitVal)), "\"}");
     }
 
 	function getTraitAttributes(uint256 tokenId) internal view returns (bytes memory) {
@@ -414,13 +413,13 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         return attribs;*/
         return 
 			bytes.concat(
-				getTraitAttributesTType(0, traits[0]),
-				getTraitAttributesTType(1, traits[1]),
-                getTraitAttributesTType(2, traits[2]),
-                getTraitAttributesTType(3, traits[3]),
-                getTraitAttributesTType(4, traits[4]),
-                getTraitAttributesTType(5, traits[5]),
-                getTraitAttributesTType(6, traits[6]),
+				getTraitAttributesTType(0, traits[0]),',',
+				getTraitAttributesTType(1, traits[1]),',',
+                getTraitAttributesTType(2, traits[2]),',',
+                getTraitAttributesTType(3, traits[3]),',',
+                getTraitAttributesTType(4, traits[4]),',',
+                getTraitAttributesTType(5, traits[5]),',',
+                getTraitAttributesTType(6, traits[6]),',',
                 getTraitAttributesTType(7, traits[7])
 			);	        
     }
