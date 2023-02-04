@@ -86,8 +86,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
-        uint256 dnabody = ((block.timestamp + block.difficulty) % 255)<<5*8;
-        uint256 dnathroat = ((block.timestamp) % 255)<<4*8;
+        uint256 dnabody = ((block.timestamp + block.difficulty + _tokenIdCounter.current()) % 255)<<5*8;
+        uint256 dnathroat = ((block.timestamp + _tokenIdCounter.current()) % 255)<<4*8;
 		_tokenIdDNA[tokenId] = (dnabody + dnathroat);
 		//setRoyalties(tokenId, owner(), 1000);
     }	
