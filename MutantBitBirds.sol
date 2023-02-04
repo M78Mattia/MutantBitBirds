@@ -26,9 +26,9 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	string private _contractUri = "https://rubykitties.tk/MBBcontractUri";
     //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
 	//string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
-	uint256 private _maxTotalSupply; 
-	uint256 private _currentReserveSupply;        
-	uint256 private _mintMaxTotalBalance = 5;
+	uint16 private _maxTotalSupply; 
+	uint16 private _currentReserveSupply;        
+	uint16 private _mintMaxTotalBalance = 5;
 	uint256 private _mintTokenPriceEth = 50000000000000000; // 0.050 ETH
 	//bool _revealed = false;
 	bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
@@ -48,7 +48,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     */   
      
 
-    constructor(uint256 maxTotalSupply, uint256 reserveSupply) ERC721("MutantBitBirds", "MTB") {
+    constructor(uint16 maxTotalSupply, uint16 reserveSupply) ERC721("MutantBitBirds", "MTB") {
         require(maxTotalSupply > 0, "err supply");
 	    require(reserveSupply < maxTotalSupply, "err reserve");
         _maxTotalSupply = maxTotalSupply;
@@ -70,7 +70,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
             //bytes(_contractUri),
             '"',
         '}');
-        return string(dataURI);
+        return string(
+			bytes.concat(
+				"data:application/json;base64,",
+				bytes(Base64.encode(dataURI))
+        ));
     }
 
     function setContractURI(string calldata contractUri) external onlyOwner() {
@@ -88,7 +92,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		//setRoyalties(tokenId, owner(), 1000);
     }	
 
-    function reserveMint(address to, uint quantity) public onlyOwner {
+    function reserveMint(address to, uint16 quantity) public onlyOwner {
         require(quantity > 0, "cannot be zero");
         require(_currentReserveSupply >= quantity, "no reserve");
         _currentReserveSupply = _currentReserveSupply -quantity;
@@ -96,7 +100,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		    internalMint(to);
     }
 	
-	function publicMint(uint quantity) external payable {
+	function publicMint(uint16 quantity) external payable {
         require(quantity > 0, "cannot be zero");
 		require(msg.sender == tx.origin, "no bots");
 		require(msg.value == quantity * _mintTokenPriceEth, "wrong price");		
@@ -155,11 +159,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     */
 
     function getCurrentReserveSupply() public view returns (string memory){
-        return _currentReserveSupply.toString();
+        return Strings.toString(_currentReserveSupply);
     }
 
     function getMaxTotalSupply() public view returns (string memory){
-        return _maxTotalSupply.toString();
+        return Strings.toString(_maxTotalSupply);
     }
 
 	function setMintTokenPriceEth(uint256 mintTokenPriceEth) external onlyOwner() {
@@ -170,12 +174,12 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         return _mintTokenPriceEth.toString();
     }  
     
- 	function setMintMaxTotalBalance(uint256 mintMaxTotalBalance) external onlyOwner() {
+ 	function setMintMaxTotalBalance(uint16 mintMaxTotalBalance) external onlyOwner() {
 		_mintMaxTotalBalance = mintMaxTotalBalance;
 	}
 
     function getMintMaxTotalBalance() public view returns (string memory){
-        return _mintMaxTotalBalance.toString();
+        return Strings.toString(_mintMaxTotalBalance);
     }       
 	    
     function withdraw(uint amount) public payable onlyOwner {
@@ -219,9 +223,38 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(_exists(tokenId), "token err");
 		return getTraitValues(tokenId)[traitId];
 	}
+
+    function validateNickName(string memory str) public pure returns (bool){
+		bytes memory b = bytes(str);
+		if(b.length < 1) return false;
+		if(b.length > 16) return false;
+		if(b[0] == 0x20) return false; // Leading space
+		if (b[b.length - 1] == 0x20) return false; // Trailing space
+
+		bytes1 lastChar = b[0];
+
+		for(uint i; i<b.length; i++){
+			bytes1 char = b[i];
+
+			if (char == 0x20 && lastChar == 0x20) return false; // Cannot contain continous spaces
+
+			if(
+				!(char >= 0x30 && char <= 0x39) && //9-0
+				!(char >= 0x41 && char <= 0x5A) && //A-Z
+				!(char >= 0x61 && char <= 0x7A) && //a-z
+				!(char == 0x20) //space
+			)
+				return false;
+
+			lastChar = char;
+		}
+
+		return true;
+	}
 	function setNickName(uint256 tokenId, string calldata nickname) public {
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
+        require(validateNickName(nickname), "refused");
         _tokenIdNickName[tokenId] = nickname;
     }    
 
@@ -354,10 +387,10 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         //return super.tokenURI(tokenId);
 		bytes memory dataURI = bytes.concat(
 			'{'
-				'"name": "MutantBitBird #', 
+				'"name": "MBB ', 
+                bytes(getNicknName(tokenId)),     
+                ' #',                           
                 bytes(tokenId.toString()), 
-                ' ',
-                bytes(getNicknName(tokenId)),
                 '",'
 				'"description": "MutantBitBirds, Earn and Mutate",'
 				'"image": "', 
