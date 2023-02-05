@@ -59,13 +59,13 @@ contract MutantCawSeed is ERC20, Ownable {
 			uint256 timerFrom = lastUpdate[_from];
 			if (timerFrom > 0)
 				rewards[_from] += (_MBBContract.balanceOf(_from) * BASE_RATE_XSEC * (time - timerFrom));
-			if (timerFrom != END)
+			if (lastUpdate[_from] != END)
 				lastUpdate[_from] = time;
 			if (_to != address(0)) {
 				uint256 timerTo = lastUpdate[_to];
 				if (timerTo > 0)
 					rewards[_to] += (_MBBContract.balanceOf(_to) * BASE_RATE_XSEC * (time - timerTo));
-				if (timerTo != END)
+				if (lastUpdate[_to] != END)
 					lastUpdate[_to] = time;
 			}
 		//}
