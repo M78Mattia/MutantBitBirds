@@ -4,8 +4,8 @@ Solidity Contract for mintable NFTs having on-chain 'mutable' DNA traits
 Experiment based on excellent Daibiri work!
 https://github.com/nft-fun
 
-Copy, past and compile (enable optimization 200) MutantBitBirds.sol on Remix
-https://remix.ethereum.org/
+Copy, past and compile MutantBitBirds.sol on Remix
+https://remix.ethereum.org/ (enable optimization 200)
 
 This is a first draft of a mintable NFT with on-chain traits.
 
