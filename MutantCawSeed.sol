@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IMBBcontract {
-	function balanceOG(address _user) external view returns(uint256);
+	function balanceOf(address _user) external view returns(uint256);
 }
 
 contract MutantCawSeed is ERC20, Ownable {
 
-	uint256 constant public BASE_RATE = 10 ether; 
-	uint256 constant public INITIAL_ISSUANCE = 300 ether;
+	uint256 constant public BASE_RATE_XSEC = 34722222222223; // * 3 eth (daily) / 86400 (seconds in a day)
+	uint256 constant public MINT_GIFT = 100 ether;
 	//  Apr 30 2033 13:33:33 GMT+0000
 	uint256 constant public END = 1998480813;
 
@@ -41,12 +41,12 @@ contract MutantCawSeed is ERC20, Ownable {
 		uint256 time = min(block.timestamp, END);
 		uint256 timerUser = lastUpdate[_user];
         if (timerUser > 0) {
-            uint256 reward = rewards[_user] + ((_MBBContract.balanceOG(_user) * BASE_RATE * (time - timerUser)) / 86400);
-            reward = reward + _amount * INITIAL_ISSUANCE;
+            uint256 reward = rewards[_user] + (_MBBContract.balanceOf(_user) * BASE_RATE_XSEC * (time - timerUser));
+            reward = reward + _amount * MINT_GIFT;
 			rewards[_user] = reward;
         }
 		else {
-			rewards[_user] = rewards[_user] + _amount * INITIAL_ISSUANCE;
+			rewards[_user] = rewards[_user] + _amount * MINT_GIFT;
         }
 		lastUpdate[_user] = time;
 	}
@@ -58,13 +58,13 @@ contract MutantCawSeed is ERC20, Ownable {
 			uint256 time = min(block.timestamp, END);
 			uint256 timerFrom = lastUpdate[_from];
 			if (timerFrom > 0)
-				rewards[_from] += ((_MBBContract.balanceOG(_from) * BASE_RATE * (time - timerFrom)) / 86400);
+				rewards[_from] += (_MBBContract.balanceOf(_from) * BASE_RATE_XSEC * (time - timerFrom));
 			if (timerFrom != END)
 				lastUpdate[_from] = time;
 			if (_to != address(0)) {
 				uint256 timerTo = lastUpdate[_to];
 				if (timerTo > 0)
-					rewards[_to] += ((_MBBContract.balanceOG(_to) * BASE_RATE * (time - timerTo)) / 86400);
+					rewards[_to] += (_MBBContract.balanceOf(_to) * BASE_RATE_XSEC * (time - timerTo));
 				if (timerTo != END)
 					lastUpdate[_to] = time;
 			}
@@ -85,13 +85,16 @@ contract MutantCawSeed is ERC20, Ownable {
 		require(msg.sender == address(_MBBContract));
 		_burn(_from, _amount);
 	}
+	
+    /*function getTotalOwned(address _user) external view returns(uint256) {
+        return _MBBContract.balanceOf(_user);
+    }*/    
 
 	function getTotalClaimable(address _user) external view returns(uint256) {
 		uint256 time = min(block.timestamp, END);
-		//uint256 pending = _MBBContract.balanceOG(_user).mul(BASE_RATE.mul((time.sub(lastUpdate[_user])))).div(86400);
         uint256 pending = 0;
         if (lastUpdate[_user] > 0 && time > lastUpdate[_user])
-            pending = (_MBBContract.balanceOG(_user) * BASE_RATE * (time- lastUpdate[_user])) / 86400;
+            pending = (_MBBContract.balanceOf(_user) * BASE_RATE_XSEC * (time- lastUpdate[_user]));
 		return rewards[_user] + pending;
 	}
 }
