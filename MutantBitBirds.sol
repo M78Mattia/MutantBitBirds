@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -14,16 +14,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 //import "./@rarible/royalties/contracts/LibPart.sol";
 //import "./@rarible/royalties/contracts/LibRoyaltiesV2.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "./MutantCawSeed.sol";
 
 
 contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 { //, RoyaltiesV2Impl {
     using Strings for uint256;
     using Counters for Counters.Counter;
 
+    address constant public REWARDCONTRACT = address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
+
     Counters.Counter private _tokenIdCounter;
     mapping(uint256 => uint256) public _tokenIdDNA;	
     mapping(uint256 => string) public _tokenIdNickName;
-	string private _contractUri = "https://rubykitties.tk/MBBcontractUri";
+	//string private _contractUri = "https://rubykitties.tk/MBBcontractUri";
     //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
 	//string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
 	uint16 private _maxTotalSupply; 
@@ -32,6 +35,10 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	uint256 private _mintTokenPriceEth = 50000000000000000; // 0.050 ETH
 	//bool _revealed = false;
 	bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
+
+    uint256 public _nameChangePrice = 300 ether;
+    
+    MutantCawSeed public _yieldToken;
     /*
     <?xml version="1.0"?>
     <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="24" height="24" fill="white" />
@@ -46,7 +53,6 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     <rect x="13" y="11" width="1" height="1" fill="red" /> 
     </svg>
     */   
-     
 
     constructor(uint16 maxTotalSupply, uint16 reserveSupply) ERC721("MutantBitBirds", "MTB") {
         require(maxTotalSupply > 0, "err supply");
@@ -55,10 +61,15 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         _currentReserveSupply = reserveSupply;
 		_setDefaultRoyalty(msg.sender, 850);
 	    reserveMint(msg.sender, 1);
+        pause();
 	}
 
+	function setYieldToken(address yieldtkn) external onlyOwner {
+		_yieldToken = MutantCawSeed(yieldtkn);
+	}    
+
     // Opensea json metadata format interface
-    function contractURI() public pure returns (string memory) {
+    function contractURI() public view returns (string memory) {
         bytes memory dataURI = bytes.concat(
         '{',
             '"name": "MutantBitBirds",',
@@ -69,6 +80,9 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
             //'"external_link": "',
             //bytes(_contractUri),
             '"',
+            '"fee_recipient": "',
+            abi.encodePacked(REWARDCONTRACT),
+            '"'
         '}');
         return string(
 			bytes.concat(
@@ -77,9 +91,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         ));
     }
 
+    /*
     function setContractURI(string calldata contractUri) external onlyOwner() {
 		_contractUri = contractUri;
 	}
+    */
 	
     function internalMint(address to) internal {
 		require(_tokenIdCounter.current() < _maxTotalSupply, "max supply");	
@@ -108,6 +124,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		require(balanceOf(msg.sender) + quantity < _mintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
 		    internalMint(msg.sender);	
+        _yieldToken.updateRewardOnMint(msg.sender, quantity);
 	}
 				
     function pause() public onlyOwner {
@@ -185,7 +202,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     function withdraw(uint amount) public payable onlyOwner {
         uint balance = address(this).balance;
         require(amount < balance);
-        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        (bool success, ) = payable(/*msg.sender*/REWARDCONTRACT).call{value: amount}("");
 		require(success, "Failed to send Ether");
     }	  
 
@@ -251,10 +268,17 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 
 		return true;
 	}
+
+	function changeNamePrice(uint256 _price) external onlyOwner {
+		_nameChangePrice = _price;
+	}
+
 	function setNickName(uint256 tokenId, string calldata nickname) public {
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
+        require(_yieldToken.balanceOf(msg.sender) >= _nameChangePrice, "more cawSeed");
+        _yieldToken.burn(msg.sender, _nameChangePrice);
         _tokenIdNickName[tokenId] = nickname;
     }    
 
@@ -517,7 +541,33 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
       return (address(0), 0);
     }
     */
+    
+    function getReward() external {
+		_yieldToken.updateReward(msg.sender, address(0), 0);
+		_yieldToken.getReward(msg.sender);
+	}
 
+    /*
+	function transferFrom(address from, address to, uint256 tokenId) public override {
+		yieldToken.updateReward(from, to, tokenId);
+		if (tokenId < 1001)
+		{
+			balanceOG[from]--;
+			balanceOG[to]++;
+		}
+		ERC721.transferFrom(from, to, tokenId);
+	}
+
+	function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
+		yieldToken.updateReward(from, to, tokenId);
+		if (tokenId < 1001)
+		{
+			balanceOG[from]--;
+			balanceOG[to]++;
+		}
+		ERC721.safeTransferFrom(from, to, tokenId, _data);
+	}
+    */
 
     function supportsInterface(bytes4 interfaceId)
         public
