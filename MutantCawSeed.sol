@@ -2,12 +2,13 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IMBBcontract {
 	function balanceOG(address _user) external view returns(uint256);
 }
 
-contract MutantCawSeed is ERC20 {
+contract MutantCawSeed is ERC20, Ownable {
 
 	uint256 constant public BASE_RATE = 10 ether; 
 	uint256 constant public INITIAL_ISSUANCE = 300 ether;
@@ -25,6 +26,9 @@ contract MutantCawSeed is ERC20 {
 		_MBBContract = IMBBcontract(mbbcntr);
 	}
 
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
 
 	function min(uint256 a, uint256 b) internal pure returns (uint256) {
 		return a < b ? a : b;
