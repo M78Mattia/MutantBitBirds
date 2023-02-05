@@ -22,4 +22,4 @@ Willing to add staking tokenomics in order to spend earned tokens to 'evolve' th
 
 First yield token implementation deployed on groeli testnet at:
 0x462237676c92B4B9D2bB1f9B35b29a3FE69B0C56 (MutantBitBirds)
-0x462237676c92B4B9D2bB1f9B35b29a3FE69B0C56 (MutantCawSeed)
+0x45eDa04a7E98505Ca2971C483B65784aF344Ea88 (MutantCawSeed)
