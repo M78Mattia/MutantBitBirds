@@ -52,7 +52,7 @@ contract MutantCawSeed is ERC20, Ownable {
 	}
 
 	// called on transfers
-	function updateReward(address _from, address _to, uint256 _tokenId) external {
+	function updateReward(address _from, address _to/*, uint256 _tokenId*/) external {
 		require(msg.sender == address(_MBBContract));
 		//if (_tokenId < 1001) {
 			uint256 time = min(block.timestamp, END);
