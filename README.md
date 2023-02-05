@@ -26,6 +26,7 @@ Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits)
 
 First yield token implementation deployed on groeli testnet at:
 
-0x462237676c92B4B9D2bB1f9B35b29a3FE69B0C56 (MutantBitBirds MBB)
+0x592bb52500053f0F1BAF320D1B6c850DF2941aE6 (MutantBitBirds MBB)
+https://goerli.etherscan.io/address/0x592bb52500053f0F1BAF320D1B6c850DF2941aE6#readContract
 
-0x45eDa04a7E98505Ca2971C483B65784aF344Ea88 (MutantCawSeed MCS)
+0xcc6fc2dCa485F41F3bD53F8ef033a56E01F0D25e (MutantCawSeed MCS)
