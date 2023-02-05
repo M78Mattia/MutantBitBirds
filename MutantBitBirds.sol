@@ -27,7 +27,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     mapping(uint256 => uint256) public _tokenIdDNA;	
     mapping(uint256 => string) public _tokenIdNickName;
 	//string private _contractUri = "https://rubykitties.tk/MBBcontractUri";
-    //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
+    	//string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
 	//string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
 	uint16 private _maxTotalSupply; 
 	uint16 private _currentReserveSupply;        
