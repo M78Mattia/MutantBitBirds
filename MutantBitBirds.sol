@@ -161,14 +161,6 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	}	
     */
 
-	function setTokenPriceEth(uint256 tokenPriceEth) external onlyOwner() {
-		_mintTokenPriceEth = tokenPriceEth;
-	}
-
-	function getTokenPriceEth() public view returns (string memory) {
-		return _mintTokenPriceEth.toString();
-	}	
-
     /*
 	function setMaxTotalSupply(uint256 maxTotalSupply) external onlyOwner() {
 		_maxTotalSupply = maxTotalSupply;
