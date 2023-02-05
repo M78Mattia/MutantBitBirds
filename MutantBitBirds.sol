@@ -27,7 +27,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     mapping(uint256 => uint256) public _tokenIdDNA;	
     mapping(uint256 => string) public _tokenIdNickName;
 	//string private _contractUri = "https://rubykitties.tk/MBBcontractUri";
-    	//string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
+    //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
 	//string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
 	uint16 private _maxTotalSupply; 
 	uint16 private _currentReserveSupply;        
@@ -120,8 +120,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(quantity > 0, "cannot be zero");
 		require(msg.sender == tx.origin, "no bots");
 		require(msg.value == quantity * _mintTokenPriceEth, "wrong price");		
-		require(_tokenIdCounter.current() < _maxTotalSupply - quantity, "max supply");	
-		require(balanceOf(msg.sender) + quantity < _mintMaxTotalBalance, "too many");
+		require(_tokenIdCounter.current() <= _maxTotalSupply - quantity, "max supply");	
+		require(balanceOf(msg.sender) + quantity <= _mintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
 		    internalMint(msg.sender);	
         _yieldToken.updateRewardOnMint(msg.sender, quantity);
@@ -199,8 +199,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         return Strings.toString(_mintMaxTotalBalance);
     }       
 	    
-    function withdraw(uint amount) public payable onlyOwner {
-        uint balance = address(this).balance;
+    function withdraw(uint256 amount) public payable onlyOwner {
+        uint256 balance = address(this).balance;
         require(amount < balance);
         (bool success, ) = payable(/*msg.sender*/REWARDCONTRACT).call{value: amount}("");
 		require(success, "Failed to send Ether");
@@ -269,7 +269,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		return true;
 	}
 
-	function changeNamePrice(uint256 _price) external onlyOwner {
+	function setNickNamePrice(uint256 _price) external onlyOwner {
 		_nameChangePrice = _price;
 	}
 
@@ -377,7 +377,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         );
     }              
 
-	function generateCharacter(uint256 tokenId) public view returns(bytes memory){
+	function generateCharacter(uint256 tokenId) internal view returns(bytes memory){
  		bytes memory svg = bytes.concat(
 		/*	'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 250 250">',
 			'<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
@@ -542,32 +542,25 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     }
     */
     
-    function getReward() external {
-		_yieldToken.updateReward(msg.sender, address(0), 0);
+    function getMutantCawSeedReward() external {
+		_yieldToken.updateReward(msg.sender, address(0)/*, 0*/);
 		_yieldToken.getReward(msg.sender);
 	}
 
-    /*
+    function getMutantCawSeedClaimable(address user) external view returns(uint256) {
+        return _yieldToken.getTotalClaimable(user);
+    }
+
+
 	function transferFrom(address from, address to, uint256 tokenId) public override {
-		yieldToken.updateReward(from, to, tokenId);
-		if (tokenId < 1001)
-		{
-			balanceOG[from]--;
-			balanceOG[to]++;
-		}
-		ERC721.transferFrom(from, to, tokenId);
+		_yieldToken.updateReward(from, to/*, tokenId*/);
+		super.transferFrom(from, to, tokenId);
 	}
 
 	function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
-		yieldToken.updateReward(from, to, tokenId);
-		if (tokenId < 1001)
-		{
-			balanceOG[from]--;
-			balanceOG[to]++;
-		}
-		ERC721.safeTransferFrom(from, to, tokenId, _data);
+		_yieldToken.updateReward(from, to/*, tokenId*/);
+		super.safeTransferFrom(from, to, tokenId, _data);
 	}
-    */
 
     function supportsInterface(bytes4 interfaceId)
         public
