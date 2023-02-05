@@ -18,3 +18,8 @@ Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-gtljfqspsd
 LooksRare: https://goerli.looksrare.org/collections/0xaFb91CEC771AB862D5c42446FB0Df95907A1016C/0
 
 Willing to add staking tokenomics in order to spend earned tokens to 'evolve' the NFT (change the on-chain traits)
+
+
+First yield token implementation deployed on groeli testnet at:
+0x462237676c92B4B9D2bB1f9B35b29a3FE69B0C56 (MutantBitBirds)
+0x462237676c92B4B9D2bB1f9B35b29a3FE69B0C56 (MutantCawSeed)
