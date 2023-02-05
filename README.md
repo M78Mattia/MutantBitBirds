@@ -18,13 +18,13 @@ LooksRare: https://goerli.looksrare.org/collections/0x592bb52500053f0F1BAF320D1B
 ---------------------------------------------------------------------------------------------
 Now developing: Tokenomics 
 
-No need to stake, earn MCS on first mint and much more simply owning one or more MBB as holder.
+No need to stake, earn MCS on first mint and much more simply owning one or more MBBs as holder.
 The more you own, the more you earn.
-Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits)
+Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, add a nickname and more to come)
 
 First yield token implementation deployed on groeli testnet at:
 
 0x592bb52500053f0F1BAF320D1B6c850DF2941aE6 (MutantBitBirds MBB)
 https://goerli.etherscan.io/address/0x592bb52500053f0F1BAF320D1B6c850DF2941aE6#readContract
 
-0xcc6fc2dCa485F41F3bD53F8ef033a56E01F0D25e (MutantCawSeed MCS)
+0xFcC54d7B2B501C562D1CF3f7002711EF439b1074 (MutantCawSeed MCS)
