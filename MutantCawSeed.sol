@@ -90,7 +90,7 @@ contract MutantCawSeed is ERC20, Ownable {
 		uint256 time = min(block.timestamp, END);
 		//uint256 pending = _MBBContract.balanceOG(_user).mul(BASE_RATE.mul((time.sub(lastUpdate[_user])))).div(86400);
         uint256 pending = 0;
-        if (time > lastUpdate[_user])
+        if (lastUpdate[_user] > 0 && time > lastUpdate[_user])
             pending = (_MBBContract.balanceOG(_user) * BASE_RATE * (time- lastUpdate[_user])) / 86400;
 		return rewards[_user] + pending;
 	}
