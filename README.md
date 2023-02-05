@@ -9,13 +9,11 @@ https://remix.ethereum.org/ (enable optimization 200)
 
 This is a first draft of a mintable NFT with on-chain traits.
 
-Last verified (readble) build is available for test on Goerli testnet, contract id: 0xaFb91CEC771AB862D5c42446FB0Df95907A1016C](https://goerli.etherscan.io/address/0xafb91cec771ab862d5c42446fb0df95907a1016c#readContract)
-
 First dynamic svg MutantBitBird is actually flying on testnet !
 
-Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-gtljfqspsd
+Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-20220205-1-v2
 
-LooksRare: https://goerli.looksrare.org/collections/0xaFb91CEC771AB862D5c42446FB0Df95907A1016C/0
+LooksRare: https://goerli.looksrare.org/collections/0x592bb52500053f0F1BAF320D1B6c850DF2941aE6/0
 
 ---------------------------------------------------------------------------------------------
 Now developing: Tokenomics 
