@@ -27,4 +27,4 @@ First yield token implementation deployed on groeli testnet at:
 0x592bb52500053f0F1BAF320D1B6c850DF2941aE6 (MutantBitBirds MBB)
 https://goerli.etherscan.io/address/0x592bb52500053f0F1BAF320D1B6c850DF2941aE6#readContract
 
-0xFcC54d7B2B501C562D1CF3f7002711EF439b1074 (MutantCawSeed MCS)
+0xc3e30b20E24b44FfE0B3D59c6050Fc455B371419 (MutantCawSeed MCS)
