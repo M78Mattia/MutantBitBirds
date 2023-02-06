@@ -26,7 +26,8 @@ contract MutantCawSeed is ERC20, Ownable {
 		_MBBContract = IMBBcontract(mbbcntr);
 	}
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public {
+    	require (msg.sender == address(_MBBContract) || msg.sender == owner());
         _mint(to, amount);
     }
 
