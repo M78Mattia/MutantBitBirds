@@ -98,14 +98,14 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     */
 	
     function internalMint(address to) internal {
-		require(_tokenIdCounter.current() < _maxTotalSupply, "max supply");	
+	require(_tokenIdCounter.current() < _maxTotalSupply, "max supply");	
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         uint256 dnabody = ((block.timestamp + block.difficulty + _tokenIdCounter.current()) % 255)<<5*8;
         uint256 dnathroat = ((block.timestamp + _tokenIdCounter.current()) % 255)<<4*8;
-		_tokenIdDNA[tokenId] = (dnabody + dnathroat);
-		//setRoyalties(tokenId, owner(), 1000);
+	_tokenIdDNA[tokenId] = (dnabody + dnathroat);
+	//setRoyalties(tokenId, owner(), 1000);
     }	
 
     function reserveMint(address to, uint16 quantity) public onlyOwner {
@@ -120,6 +120,13 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(quantity > 0, "cannot be zero");
 		require(msg.sender == tx.origin, "no bots");
 		require(msg.value == quantity * _mintTokenPriceEth, "wrong price");		
+        /* To accept a token as ayment..
+        The user needs to approve() your contract address to pull their tokens. This action needs to be called directly from the user address (on the token contract).
+        Then you can transferFrom() their address to yours.
+        function AcceptPayment(uint32 amount) public {
+        bool success = tokenUSDC.transferFrom(msg.sender, address(this), amount * priceCapsule);
+        require(success, "Could not transfer token. Missing approval?");        
+        */		
 		require(_tokenIdCounter.current() <= _maxTotalSupply - quantity, "max supply");	
 		require(balanceOf(msg.sender) + quantity <= _mintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
