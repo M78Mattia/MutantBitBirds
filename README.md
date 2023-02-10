@@ -28,3 +28,9 @@ First yield token implementation deployed on groeli testnet at:
 https://goerli.etherscan.io/address/0x592bb52500053f0F1BAF320D1B6c850DF2941aE6#readContract
 
 0xc3e30b20E24b44FfE0B3D59c6050Fc455B371419 (MutantCawSeed MCS)
+
+-----------------------------------------------------------------------------
+
+Test page here:
+https://rubykitties.tk/bitBirds.html
+
