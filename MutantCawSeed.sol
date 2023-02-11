@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -37,65 +37,67 @@ contract MutantCawSeed is ERC20, Ownable {
 
     // called when minting many NFTs
 	// updated_amount = (balanceOG(user) * base_rate * delta / 86400) + amount * initial rate
-	function updateRewardOnMint(address _user, uint16 _amount) external {
+	function updateRewardOnMint(address user, uint16 amount) external {
 		require(msg.sender == address(MBBContract), "Can't call this");
 		uint256 time = min(block.timestamp, END);
-		uint256 timerUser = LastUpdate[_user];
+		uint256 timerUser = LastUpdate[user];
         if (timerUser > 0) {
-            uint256 reward = Rewards[_user] + (MBBContract.balanceOf(_user) * BASE_RATE_XSEC * (time - timerUser));
-            reward = reward + _amount * MINT_GIFT;
-			Rewards[_user] = reward;
+            uint256 reward = Rewards[user] + (MBBContract.balanceOf(user) * BASE_RATE_XSEC * (time - timerUser));
+            reward = reward + amount * MINT_GIFT;
+			Rewards[user] = reward;
         }
 		else {
-			Rewards[_user] = Rewards[_user] + _amount * MINT_GIFT;
+			Rewards[user] = Rewards[user] + amount * MINT_GIFT;
         }
-		LastUpdate[_user] = time;
+		LastUpdate[user] = time;
 	}
 
 	// called on transfers
-	function updateReward(address _from, address _to/*, uint256 _tokenId*/) external {
+	function updateReward(address from, address to/*, uint256 _tokenId*/) external {
 		require(msg.sender == address(MBBContract));
 		//if (_tokenId < 1001) {
 			uint256 time = min(block.timestamp, END);
-			uint256 timerFrom = LastUpdate[_from];
+			uint256 timerFrom = LastUpdate[from];
 			if (timerFrom > 0)
-				Rewards[_from] += (MBBContract.balanceOf(_from) * BASE_RATE_XSEC * (time - timerFrom));
-			if (LastUpdate[_from] != END)
-				LastUpdate[_from] = time;
-			if (_to != address(0)) {
-				uint256 timerTo = LastUpdate[_to];
+				Rewards[from] += (MBBContract.balanceOf(from) * BASE_RATE_XSEC * (time - timerFrom));
+			if (LastUpdate[from] != END)
+				LastUpdate[from] = time;
+			if (to != address(0)) {
+				uint256 timerTo = LastUpdate[to];
 				if (timerTo > 0)
-					Rewards[_to] += (MBBContract.balanceOf(_to) * BASE_RATE_XSEC * (time - timerTo));
-				if (LastUpdate[_to] != END)
-					LastUpdate[_to] = time;
+					Rewards[to] += (MBBContract.balanceOf(to) * BASE_RATE_XSEC * (time - timerTo));
+				if (LastUpdate[to] != END)
+					LastUpdate[to] = time;
 			}
 		//}
 	}
 
-	function getReward(address _to) external {
+	function getReward(address to) external {
 		require(msg.sender == address(MBBContract));
-		uint256 reward = Rewards[_to];
+		uint256 reward = Rewards[to];
 		if (reward > 0) {
-			Rewards[_to] = 0;
-			_mint(_to, reward);
-			emit RewardPaid(_to, reward);
+			Rewards[to] = 0;
+			_mint(to, reward);
+			emit RewardPaid(to, reward);
 		}
 	}
 
-	function burn(address _from, uint256 _amount) external {
+	function burn(address from, uint256 amount) external {
 		require(msg.sender == address(MBBContract));
-		_burn(_from, _amount);
+		_burn(from, amount);
 	}
 	
-    /*function getTotalOwned(address _user) external view returns(uint256) {
-        return _MBBContract.balanceOf(_user);
-    }*/    
+	function collect(address from, uint256 amount) external {
+		require(msg.sender == address(MBBContract));
+		require(Rewards[from] >= amount);
+		Rewards[from] -= amount;
+	} 
 
-	function getTotalClaimable(address _user) external view returns(uint256) {
+	function getTotalClaimable(address user) external view returns(uint256) {
 		uint256 time = min(block.timestamp, END);
         uint256 pending = 0;
-        if (LastUpdate[_user] > 0 && time > LastUpdate[_user])
-            pending = (MBBContract.balanceOf(_user) * BASE_RATE_XSEC * (time - LastUpdate[_user]));
-		return Rewards[_user] + pending;
+        if (LastUpdate[user] > 0 && time > LastUpdate[user])
+            pending = (MBBContract.balanceOf(user) * BASE_RATE_XSEC * (time - LastUpdate[user]));
+		return Rewards[user] + pending;
 	}
 }
