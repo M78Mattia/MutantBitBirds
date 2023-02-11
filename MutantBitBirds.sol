@@ -27,6 +27,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     address public BreedTokensContract = address(0);   
     bool BreedTokensContractIsErc1155;
     bool YieldTokenWithdrawalAllowed = false;
+    bool FreeMintAllowed = false;
 
     mapping(uint256 => uint64) public TokenIdDNA;	
     mapping(uint256 => string) public TokenIdNickName;
@@ -121,8 +122,12 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 
 	function setBreedTokensContract(address breedTokenContract, bool isErc1155) external onlyOwner {
         BreedTokensContract = breedTokenContract;   
-        BreedTokensContractIsErc1155 = isErc1155;
+        BreedTokensContractIsErc1155 = isErc1155;        
 	}  
+
+	function setFreeMintAllowed(bool allow) external onlyOwner {
+      FreeMintAllowed = allow;
+    }
 
 	function setChageTraitPrice(uint8 traitId, bool allowed, uint32 changeCostEthMillis, uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis, uint8 minValue, uint8 maxValue) internal  {
         require (traitId < 8, "trait err");
@@ -205,7 +210,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	}
     */     
 
-    function breedMint(address to, uint16 quantity, uint256[] calldata breedtokens) public {
+    function breedMint(uint16 quantity, uint256[] calldata breedtokens) public {
         require(BreedTokensContract != address(0), "no breed");
         require(quantity > 0, "cannot be zero");
 		require(msg.sender == tx.origin, "no bots");        
@@ -216,48 +221,56 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
             require(BreedTokenIds[breedtokens[i]]== 0, "bread yet");
             //require(isValidBreedToken(breedtokens[i]), "token err");            
             require(walletHoldsBreedToken(breedtokens[i], msg.sender) || (msg.sender == owner()), "no owner");
-		    BreedTokenIds[breedtokens[i]] = internalMint(to);
+		    BreedTokenIds[breedtokens[i]] = internalMint(msg.sender);
         }
         BreedTokensCount += quantity;
         CurrentReserveSupply = CurrentReserveSupply - quantity; 
         YieldToken.updateRewardOnMint(msg.sender, quantity);           
     }
 	
-	function publicMint(uint16 quantity) internal  {
+	function publicMint(address user, uint16 quantity) internal  {
         require(quantity > 0, "cannot be zero");
-		require(msg.sender == tx.origin, "no bots");		
+		//require(msg.sender == tx.origin, "no bots");		
 		require(_tokenIdCounter.current() <= MaxTotalSupply - CurrentReserveSupply - quantity, "max supply");	
-		require(balanceOf(msg.sender) + quantity <= MintMaxTotalBalance, "too many");
+		require(balanceOf(user) + quantity <= MintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
-		    internalMint(msg.sender);	
-        YieldToken.updateRewardOnMint(msg.sender, quantity);
+		    internalMint(user);	
+        YieldToken.updateRewardOnMint(user, quantity);
 	}
 
-    function publicMintEth(uint16 quantity) external payable {
-		require(msg.value == quantity * MintTokenPriceEth, "wrong price");	 
-        publicMint(quantity);       
+    function publicMintFree() public {
+		require(FreeMintAllowed, "not allowed");	 
+        publicMint(msg.sender, 1);       
     }
 
-    function AcceptWEthPayment(uint32 quantity) internal  {
-        bool success = _tokenWEth.transferFrom(msg.sender, address(this), quantity * MintTokenPriceEth);
+    function publicMintEth(uint16 quantity) external payable {
+		require(msg.value == quantity * MintTokenPriceEth, "wrong price");
+        require(msg.sender == tx.origin, "no bots");	 
+        publicMint(msg.sender, quantity);       
+    }
+
+    function AcceptWEthPayment(address user, uint32 quantity) internal  {
+        bool success = _tokenWEth.transferFrom(user, address(this), quantity * MintTokenPriceEth);
         require(success, "Could not transfer token. Missing approval?");
     }
 
     function publicMintWEth(uint16 quantity) external payable {
         require(address(_tokenWEth) != address(0), "not enabled");
-        AcceptWEthPayment(quantity);
-        publicMint(quantity);       
+        require(msg.sender == tx.origin, "no bots");
+        AcceptWEthPayment(msg.sender, quantity);
+        publicMint(msg.sender, quantity);       
     }    
 
-    function AcceptUsdcPayment(uint32 quantity)  internal {
-        bool success = _tokenUsdc.transferFrom(msg.sender, address(this), quantity * MintTokenPriceUsdc);
+    function AcceptUsdcPayment(address user, uint32 quantity)  internal {
+        bool success = _tokenUsdc.transferFrom(user, address(this), quantity * MintTokenPriceUsdc);
         require(success, "Could not transfer token. Missing approval?");
     }
 
     function publicMintUsdc(uint16 quantity) external payable {
         require(address(_tokenUsdc) != address(0), "not enabled");
-        AcceptUsdcPayment(quantity);
-        publicMint(quantity);       
+        require(msg.sender == tx.origin, "no bots");
+        AcceptUsdcPayment(msg.sender, quantity);
+        publicMint(msg.sender, quantity);       
     }       
 				
     function pause() public onlyOwner {
@@ -385,7 +398,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
-        spendYieldTokens(msg.sender, NickNameChangePriceEthMillis * 1000000);
+        uint64 cost = NickNameChangePriceEthMillis;
+        spendYieldTokens(msg.sender, cost * 1000000);
         TokenIdNickName[tokenId] = nickname;
     }    
 
