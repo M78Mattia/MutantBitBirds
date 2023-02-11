@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -26,6 +26,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     MutantCawSeed public YieldToken;
     address public BreedTokensContract = address(0);   
     bool BreedTokensContractIsErc1155;
+    bool YieldTokenWithdrawalAllowed = false;
 
     mapping(uint256 => uint64) public TokenIdDNA;	
     mapping(uint256 => string) public TokenIdNickName;
@@ -37,7 +38,16 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 	uint16 public MintMaxTotalBalance = 5;
 	uint256 public MintTokenPriceEth = 50000000000000000; // 0.050 ETH
     uint256 public MintTokenPriceUsdc = 50000000000000000000; // 50 USDT
-    uint256 public NickNameChangePrice = 300 ether; 
+    uint32 public NickNameChangePriceEthMillis = 100* 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
+    struct TraitChangeCost {
+        bool allowed;
+        uint32 changeCostEthMillis;
+        uint32 increaseStepCostEthMillis;
+        uint32 decreaseStepCostEthMillis;
+        uint8 minValue;
+        uint8 maxValue;
+    }
+    mapping(uint8 => TraitChangeCost) public TraitChangeCosts;    
     
     //bool _mintAllowWEthPayment = true;
     //bool _mintAllowUsdtPayment = true;
@@ -71,6 +81,9 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         // if you plan to set a breedCollection reference, be sure to reserve at least as much as the total breedable tokens!
         CurrentReserveSupply = reserveSupply;
 		_setDefaultRoyalty(msg.sender, 850);
+        setChageTraitPrice(7, true, 100, 0, 0, 0, 255);
+        setChageTraitPrice(6, true, 100, 0, 0, 0, 255);
+        setChageTraitPrice(5, true, 100, 0, 0, 0, 255);
 	    reserveMint(msg.sender, 1);
         pause();
 	}
@@ -79,10 +92,34 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		YieldToken = MutantCawSeed(yieldtkn);
 	}    
 
+    function setYieldTokenWithdrawalAllowed(bool allowed) external onlyOwner {
+        YieldTokenWithdrawalAllowed = allowed;
+    }
+
+    function withdrawMutantCawSeedReward() external {
+        require(YieldTokenWithdrawalAllowed, "not allowed yet");
+		YieldToken.updateReward(msg.sender, address(0)/*, 0*/);
+		YieldToken.getReward(msg.sender);
+	}
+
+    function getMutantCawSeedClaimable(address user) external view returns(uint256) {
+        return YieldToken.getTotalClaimable(user);
+    }
+
+    function getMutantCawSeedAvailable(address user) external view returns(uint256) {
+        return YieldToken.balanceOf(user) + YieldToken.getTotalClaimable(user);
+    }    
+
 	function setBreedTokensContract(address breedTokenContract, bool isErc1155) external onlyOwner {
         BreedTokensContract = breedTokenContract;   
         BreedTokensContractIsErc1155 = isErc1155;
-	}   
+	}  
+
+	function setChageTraitPrice(uint8 traitId, bool allowed, uint32 changeCostEthMillis, uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis, uint8 minValue, uint8 maxValue) internal  {
+        require (traitId < 8, "trait err");
+        TraitChangeCost memory tc = TraitChangeCost(allowed, changeCostEthMillis, increaseStepCostEthMillis, decreaseStepCostEthMillis, minValue, maxValue);
+		TraitChangeCosts[traitId] = tc;
+	}        
 
     // Opensea json metadata format interface
     function contractURI() public view returns (string memory) {
@@ -317,25 +354,50 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		}
 
 		return true;
+	} 
+
+	function setNickNamePrice(uint32 changeNickNamePriceEthMillis) external onlyOwner {
+		NickNameChangePriceEthMillis = changeNickNamePriceEthMillis;
 	}
 
-	function setNickNamePrice(uint256 _price) external onlyOwner {
-		NickNameChangePrice = _price;
-	}
+    function spendYieldTokens(address user, uint256 amount) internal {
+        if (YieldTokenWithdrawalAllowed) {
+            require(YieldToken.balanceOf(user) >= amount, "cawSeed balance");
+            YieldToken.burn(user, amount);
+        }
+        else {
+            require(/*YieldToken.balanceOf(user) +*/ YieldToken.getTotalClaimable(user) >= amount, "cawSeed available");
+            YieldToken.updateReward(user, address(0)/*, 0*/);
+            YieldToken.collect(user, amount);
+        }        
+    }
 
 	function setNickName(uint256 tokenId, string calldata nickname) public {
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
-        require(YieldToken.balanceOf(msg.sender) >= NickNameChangePrice, "more cawSeed");
-        YieldToken.burn(msg.sender, NickNameChangePrice);
+        spendYieldTokens(msg.sender, NickNameChangePriceEthMillis * 1000000);
         TokenIdNickName[tokenId] = nickname;
     }    
 
 	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) public {
-        require (traitId < 8, "trait err");
+        require(traitId < 8, "trait err");
+        TraitChangeCost memory tc = TraitChangeCosts[traitId];
+        require(tc.allowed, "not allowed");
+        require(tc.minValue <= traitValue, "minValue");
+        require(tc.maxValue >= traitValue, "maxValue");
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
+        uint8 currentValue = getTraitValue(tokenId, traitId);
+        require(currentValue != traitValue, "currentValue");
+        uint64 cost = tc.changeCostEthMillis;
+        if (traitValue > currentValue) {
+              cost += tc.increaseStepCostEthMillis * (traitValue - currentValue);
+        }
+        else {
+              cost += tc.decreaseStepCostEthMillis * (currentValue - traitValue);
+        }
+        spendYieldTokens(msg.sender, cost * 1000000);
         uint64 newvalue = traitValue;
         newvalue = newvalue << (8 *traitId);
         uint64 oldvalue = TokenIdDNA[tokenId];
@@ -583,17 +645,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
       }
       return (address(0), 0);
     }
-    */
-    
-    function getMutantCawSeedReward() external {
-		YieldToken.updateReward(msg.sender, address(0)/*, 0*/);
-		YieldToken.getReward(msg.sender);
-	}
-
-    function getMutantCawSeedClaimable(address user) external view returns(uint256) {
-        return YieldToken.getTotalClaimable(user);
-    }
-
+    */    
 
 	function transferFrom(address from, address to, uint256 tokenId) public override(ERC721, IERC721) {
 		YieldToken.updateReward(from, to/*, tokenId*/);
