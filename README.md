@@ -11,9 +11,9 @@ This is a first draft of a mintable NFT with on-chain traits.
 
 First dynamic svg MutantBitBird is actually flying on testnet !
 
-Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-20220205-1-v2
+Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-1
 
-LooksRare: https://goerli.looksrare.org/collections/0x592bb52500053f0F1BAF320D1B6c850DF2941aE6/0
+LooksRare: https://goerli.looksrare.org/collections/0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67/0
 
 ---------------------------------------------------------------------------------------------
 Now developing: Tokenomics 
