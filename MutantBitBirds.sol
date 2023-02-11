@@ -81,9 +81,18 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         // if you plan to set a breedCollection reference, be sure to reserve at least as much as the total breedable tokens!
         CurrentReserveSupply = reserveSupply;
 		_setDefaultRoyalty(msg.sender, 850);
-        setChageTraitPrice(7, true, 100, 0, 0, 0, 255);
-        setChageTraitPrice(6, true, 100, 0, 0, 0, 255);
-        setChageTraitPrice(5, true, 100, 0, 0, 0, 255);
+        // setChageTraitPrice(uint8 traitId,
+        //      bool allowed, uint32 changeCostEthMillis, 
+        //      uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis, 
+        //      uint8 minValue, uint8 maxValue)
+        //setChageTraitPrice(0, true, 100, 0, 0, 0, 255); // undef
+        setChageTraitPrice(1, true, 0, 0, 100*1000, 0, 4); // type
+        setChageTraitPrice(2, true, 0, 50*1000, 0, 0, 2); // eyes
+        setChageTraitPrice(3, true, 0, 20*1000, 0, 0, 3); // beak
+        setChageTraitPrice(4, true, 1*1000, 0, 0, 0, 255); // throat
+        setChageTraitPrice(5, true, 1*1000, 0, 0, 0, 255); // head 
+        setChageTraitPrice(6, true, 0, 0, 1*1000, 0, 255); // level
+        setChageTraitPrice(7, true, 0, 0, 1*1000, 0, 255); // stamina
 	    reserveMint(msg.sender, 1);
         pause();
 	}
@@ -451,10 +460,14 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
     } 
    
    function getBasicBirdBeak( uint8 traitval) internal pure returns (bytes memory) {
+        bytes memory beakColor = 'grey';
+        if (traitval == 1) beakColor = 'gold';
+        else if (traitval == 2) beakColor = 'red';
+        else if (traitval == 3) beakColor = 'black';
         bytes memory  basic_bird_beak_poly = "\"12,13 17,13 18,14 18,18 17,17 12,17\"";       
         return bytes.concat(
             "<polyline points=", bytes(basic_bird_beak_poly), " stroke=\"black", "\" />",
-            "<polyline points=", bytes(basic_bird_beak_poly), " fill=\"", getRgbFromTraitVal(traitval), "\" />"
+            "<polyline points=", bytes(basic_bird_beak_poly), " fill=\"", /*getRgbFromTraitVal(traitval)*/beakColor, "\" />"
         );
     }  
     
@@ -478,7 +491,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         getBasicBirdHead(traits[5]),
         getBasicBirdThroat(traits[4]),
         getBasicBirdBeak(traits[3]),
-        getBirdEyes(false)
+        getBirdEyes(traits[2] != 0)
         );
     }              
 
