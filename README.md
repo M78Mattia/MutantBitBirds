@@ -13,8 +13,6 @@ First dynamic svg MutantBitBird is actually flying on testnet !
 
 Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-1
 
-LooksRare: https://goerli.looksrare.org/collections/0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67/0
-
 ---------------------------------------------------------------------------------------------
 Now developing: Tokenomics 
 
