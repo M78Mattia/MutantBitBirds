@@ -92,8 +92,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         setChageTraitPrice(3, true, 0, 20*1000, 0, 0, 3); // beak
         setChageTraitPrice(4, true, 1*1000, 0, 0, 0, 255); // throat
         setChageTraitPrice(5, true, 1*1000, 0, 0, 0, 255); // head 
-        setChageTraitPrice(6, true, 0, 0, 1*1000, 0, 255); // level
-        setChageTraitPrice(7, true, 0, 0, 1*1000, 0, 255); // stamina
+        setChageTraitPrice(6, true, 0, 1*1000, 0, 0, 255); // level
+        setChageTraitPrice(7, true, 0, 1*1000, 0, 0, 255); // stamina
 	    reserveMint(msg.sender, 1);
         pause();
 	}
@@ -223,7 +223,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
             require(walletHoldsBreedToken(breedtokens[i], msg.sender) || (msg.sender == owner()), "no owner");
 		    BreedTokenIds[breedtokens[i]] = internalMint(msg.sender);
         }
-        BreedTokensCount += quantity;
+        BreedTokensCount = BreedTokensCount + quantity;
         CurrentReserveSupply = CurrentReserveSupply - quantity; 
         YieldToken.updateRewardOnMint(msg.sender, quantity);           
     }
@@ -339,7 +339,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         return traits;   
     }
 
-    function getNicknName(uint256 tokenId) public view returns (string memory ) {
+    function getNickName(uint256 tokenId) public view returns (string memory ) {
          require(_exists(tokenId), "token err");
          return string(TokenIdNickName[tokenId]);
     }
@@ -398,8 +398,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
-        uint64 cost = NickNameChangePriceEthMillis;
-        spendYieldTokens(msg.sender, cost * 1000000);
+        uint256 cost = NickNameChangePriceEthMillis;
+        spendYieldTokens(msg.sender, (cost * 1000000000000000));
         TokenIdNickName[tokenId] = nickname;
     }    
 
@@ -413,14 +413,14 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
         require(ownerOf(tokenId) == msg.sender, "no owner");
         uint8 currentValue = getTraitValue(tokenId, traitId);
         require(currentValue != traitValue, "currentValue");
-        uint64 cost = tc.changeCostEthMillis;
+        uint256 cost = tc.changeCostEthMillis;
         if (traitValue > currentValue) {
-              cost += tc.increaseStepCostEthMillis * (traitValue - currentValue);
+              cost = cost + tc.increaseStepCostEthMillis * (traitValue - currentValue);
         }
         else {
-              cost += tc.decreaseStepCostEthMillis * (currentValue - traitValue);
+              cost = cost + tc.decreaseStepCostEthMillis * (currentValue - traitValue);
         }
-        spendYieldTokens(msg.sender, cost * 1000000);
+        spendYieldTokens(msg.sender, cost * 1000000000000000);
         uint64 newvalue = traitValue;
         newvalue = newvalue << (8 *traitId);
         uint64 oldvalue = TokenIdDNA[tokenId];
@@ -544,7 +544,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981 
 		bytes memory dataURI = bytes.concat(
 			'{'
 				'"name": "MBB ', 
-                bytes(getNicknName(tokenId)),     
+                bytes(getNickName(tokenId)),     
                 ' #',                           
                 bytes(tokenId.toString()), 
                 '",'
