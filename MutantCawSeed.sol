@@ -89,7 +89,7 @@ contract MutantCawSeed is ERC20, Ownable {
 	
 	function collect(address from, uint256 amount) external {
 		require(msg.sender == address(MBBContract));
-		require(Rewards[from] >= amount);
+		require(Rewards[from] >= amount, "amount");
 		Rewards[from] -= amount;
 	} 
 
