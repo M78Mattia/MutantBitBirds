@@ -58,15 +58,15 @@ contract MutantCawSeed is ERC20, Ownable {
 		//if (_tokenId < 1001) {
 			uint256 time = min(block.timestamp, END);
 			uint256 timerFrom = LastUpdate[from];
-			if (timerFrom > 0)
-				Rewards[from] += (MBBContract.balanceOf(from) * BASE_RATE_XSEC * (time - timerFrom));
-			if (LastUpdate[from] != END)
+			if (timerFrom > 0 && time > timerFrom)
+				Rewards[from] = Rewards[from] + (MBBContract.balanceOf(from) * BASE_RATE_XSEC * (time - timerFrom));
+			if (timerFrom != END && time > timerFrom)
 				LastUpdate[from] = time;
 			if (to != address(0)) {
 				uint256 timerTo = LastUpdate[to];
-				if (timerTo > 0)
-					Rewards[to] += (MBBContract.balanceOf(to) * BASE_RATE_XSEC * (time - timerTo));
-				if (LastUpdate[to] != END)
+				if (timerTo > 0 && time > timerTo)
+					Rewards[to] = Rewards[to] + (MBBContract.balanceOf(to) * BASE_RATE_XSEC * (time - timerTo));
+				if (timerTo != END && time > timerTo)
 					LastUpdate[to] = time;
 			}
 		//}
@@ -89,8 +89,10 @@ contract MutantCawSeed is ERC20, Ownable {
 	
 	function collect(address from, uint256 amount) external {
 		require(msg.sender == address(MBBContract));
-		require(Rewards[from] >= amount, "amount");
-		Rewards[from] -= amount;
+		uint256 rew = Rewards[from];
+		require(rew >= amount, "amount");
+		Rewards[from] = rew - amount;
+		//console.log("reward %s - collect %s tokens from %s - balance", from, amount, rew, Rewards[from]);
 	} 
 
 	function getTotalClaimable(address user) external view returns(uint256) {
