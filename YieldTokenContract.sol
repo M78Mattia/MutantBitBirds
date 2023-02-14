@@ -20,8 +20,8 @@ contract YieldTokenContract is ERC20, Ownable {
 
 	event RewardPaid(address indexed user, uint256 reward);
 
-    constructor(address mbbcntr) ERC20("MutantCawSeed", "MCS") {
-		MainContract = IMainContract(mbbcntr);
+    constructor(address maincontract) ERC20("MutantCawSeed", "MCS") {
+		MainContract = IMainContract(maincontract);
 	}
 
     function mint(address to, uint256 amount) public {
