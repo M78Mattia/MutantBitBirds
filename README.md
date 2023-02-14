@@ -1,5 +1,5 @@
 # MutantBitBirds
-Solidity Contract for mintable NFTs having on-chain 'mutable' DNA traits
+Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits
 
 Experiment based on excellent Daibiri work!
 https://github.com/nft-fun
