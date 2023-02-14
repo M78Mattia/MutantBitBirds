@@ -45,3 +45,5 @@ https://goerli.etherscan.io/address/0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67#r
 Test page here (wip):
 https://rubykitties.tk/bitBirds.html
 
+Last build:
+0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f
