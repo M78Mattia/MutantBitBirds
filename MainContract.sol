@@ -36,7 +36,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 	uint16 public MaxTotalSupply; 
 	uint16 public MaxBreedSupply;
     uint16 public CurrentBreedSupply = 0;    
-	uint16 public CurrentReserveSupply;            
+	uint16 public CurrentReserveSupply;    
+	uint16 public CurrentPublicSupply;              
 	uint16 public MintMaxTotalBalance = 5;
 	uint256 public MintTokenPriceEth = 50000000000000000; // 0.050 ETH
     uint256 public MintTokenPriceUsdc = 50000000000000000000; // 50 USDT
@@ -56,6 +57,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         MaxTotalSupply = maxTotalSupply;
         MaxBreedSupply = maxBreedSupply;
         CurrentReserveSupply = reserveSupply;
+        CurrentPublicSupply = MaxTotalSupply - reserveSupply - maxBreedSupply;        
 		_setDefaultRoyalty(msg.sender, 850);
 	    //reserveMint(msg.sender, 1);
         pause();
@@ -102,9 +104,10 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
      }
 
     function internalMint(address to) internal whenNotPaused returns(uint256) {
-        require(_tokenIdCounter.current() < MaxTotalSupply, "max supply");	
-        uint256 tokenId = _tokenIdCounter.current();
+        uint256 tokenId = _tokenIdCounter.current();        
+        require(tokenId < MaxTotalSupply, "max supply");	
         _tokenIdCounter.increment();
+        tokenId = tokenId + 1;
         _safeMint(to, tokenId);
         TokenUriLogic.randInitTokenDNA(tokenId);
         //setRoyalties(tokenId, owner(), 1000);
@@ -164,10 +167,13 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 	function publicMint(address user, uint16 quantity) internal  {
         require(quantity > 0, "cannot be zero");
 		//require(msg.sender == tx.origin, "no bots");		
-		require(_tokenIdCounter.current() <= MaxTotalSupply - CurrentReserveSupply - quantity, "max supply");	
+        require(CurrentPublicSupply >= quantity);	
 		require(balanceOf(user) + quantity <= MintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
-		    internalMint(user);	
+        {
+		    internalMint(user);
+        }
+        CurrentPublicSupply = CurrentPublicSupply - quantity;	
         YieldToken.updateRewardOnMint(user, quantity);
 	}
 
