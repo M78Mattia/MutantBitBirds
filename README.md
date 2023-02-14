@@ -35,15 +35,15 @@ Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, 
 
 Already eployed on groeli testnet at:
 
-0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67 (MutantBitBirds MBB)<br />
-https://goerli.etherscan.io/address/0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67#readContract<br />
+0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f (MutantBitBirds MBB)<br />
+https://goerli.etherscan.io/address/0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f#readContract<br />
 <br />
-0xD8BefC4Da6fc79CF9D3e67E7b6F17B8851255E15 (MutantCawSeed MCS)<br />
+0xC961e7e4D5a7451817111BE3087ee69fa1603054 (MutantCawSeed MCS)<br />
 
 -----------------------------------------------------------------------------
 
 Test page here (wip):
 https://rubykitties.tk/bitBirds.html
 
-Last build:
-0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f
+Previous build:
+0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67
