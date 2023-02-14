@@ -149,7 +149,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         require(quantity > 0, "cannot be zero");        
 		require(msg.sender == tx.origin, "no bots");        
         require(quantity == breedtokens.length, "tokens err");
-        require(MaxBreedSupply <= CurrentBreedSupply + quantity, "no reserve");
+        require(CurrentBreedSupply + quantity <= MaxBreedSupply, "no reserve");
         for (uint i = 0; i < quantity; i++) 
         {
             require(BreedTokenIds[breedtokens[i]]== 0, "bread yet");
