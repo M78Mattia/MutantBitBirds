@@ -21,8 +21,8 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
     mapping(uint256 => uint64) public TokenIdDNA;
     mapping(uint8 => TraitChangeCost) public TraitChangeCosts;    
 
-    constructor(address mbbcntr)  {
-		MainContract = IMainContract(mbbcntr);
+    constructor(address maincontract)  {
+	MainContract = IMainContract(maincontract);
         // setChageTraitPrice(uint8 traitId,
         //      bool allowed, uint32 changeCostEthMillis, 
         //      uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis, 
