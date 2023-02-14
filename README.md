@@ -6,19 +6,19 @@ https://github.com/nft-fun
 
 Evolving to a free contract template with tokenomics and on-chain traits with svg dynamic nfts (no need to external storage)
 
-Interfaces.sol - common interfaces defines
-MainContract.sol - main contract logic
-YieldTokenContract.sol - yield token rewards tokenomics (optional allowed withdrawal)
-TokenUriLogicContract.sol - dna-traits and dynamic character logics
+Interfaces.sol - common interfaces defines<br />
+MainContract.sol - main contract logic<br />
+YieldTokenContract.sol - yield token rewards tokenomics (optional allowed withdrawal)<br />
+TokenUriLogicContract.sol - dna-traits and dynamic character logics<br />
 
-Copy, past and compile on Remix
-https://remix.ethereum.org/ (enable optimization 200)
+Copy, past and compile on Remix<br />
+https://remix.ethereum.org/ (enable optimization 200)<br />
 
-Deploy MainContract
-Deploy YieldTokenContract (pass MainContract address as constructor param)
-Deploy TokenUriLogicContract (pass MainContract address as constructor param)
-Set YieldTokenContract address on the deployed MainContract (setYieldToken)
-Set TokenUriLogicContract address on the deployed MainContract (setTokenUriLogic)
+Deploy MainContract<br />
+Deploy YieldTokenContract (pass MainContract address as constructor param)<br />
+Deploy TokenUriLogicContract (pass MainContract address as constructor param)<br />
+Set YieldTokenContract address on the deployed MainContract (setYieldToken)<br />
+Set TokenUriLogicContract address on the deployed MainContract (setTokenUriLogic)<br />
 
 This is a first draft of a mintable NFT with on-chain traits.
 
@@ -35,10 +35,10 @@ Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, 
 
 Already eployed on groeli testnet at:
 
-0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67 (MutantBitBirds MBB)
-https://goerli.etherscan.io/address/0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67#readContract
-
-0xD8BefC4Da6fc79CF9D3e67E7b6F17B8851255E15 (MutantCawSeed MCS)
+0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67 (MutantBitBirds MBB)<br />
+https://goerli.etherscan.io/address/0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67#readContract<br />
+<br />
+0xD8BefC4Da6fc79CF9D3e67E7b6F17B8851255E15 (MutantCawSeed MCS)<br />
 
 -----------------------------------------------------------------------------
 
