@@ -7,8 +7,11 @@ https://github.com/nft-fun
 Evolving to a free contract template with tokenomics and on-chain traits with svg dynamic nfts (no need to external storage)
 
 Interfaces.sol - common interfaces defines
+
 MainContract.sol - main contract logic
+
 YieldTokenContract.sol - yield token rewards tokenomics (optional allowed withdrawal)
+
 TokenUriLogicContract.sol - dna-traits and dynamic character logics
 
 Copy, past and compile on Remix
