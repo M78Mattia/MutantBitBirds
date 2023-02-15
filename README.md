@@ -33,7 +33,7 @@ No need to stake, earn MCS on first mint and much more simply owning one or more
 The more you own, the more you earn.
 Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, add a nickname and more to come)
 
-Already eployed on groeli testnet at:
+Already deployed on groeli testnet at:
 
 0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f (MutantBitBirds MBB)<br />
 https://goerli.etherscan.io/address/0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f#readContract<br />
