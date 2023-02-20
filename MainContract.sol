@@ -30,18 +30,21 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
     bool BreedTokensContractIsErc1155;
     bool YieldTokenWithdrawalAllowed = false;
     bool FreeMintAllowed = false;
+    bool PublicMintAllowed = false; 
+    bool BreedMintAllowed = false;        
 	     
-    mapping(uint256 => string) public TokenIdNickName;
-    mapping(uint256 => uint256) public BreedTokenIds;
+    mapping(address => uint16) public BreedAddressCount;
+    mapping(uint256 => uint256) public BreedTokenIds;   
+    mapping(uint256 => string) public TokenIdNickName;     
 	uint16 public MaxTotalSupply; 
 	uint16 public MaxBreedSupply;
     uint16 public CurrentBreedSupply = 0;    
 	uint16 public CurrentReserveSupply;    
 	uint16 public CurrentPublicSupply;              
 	uint16 public MintMaxTotalBalance = 5;
+	uint32 public NickNameChangePriceEthMillis = 100* 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)    
 	uint256 public MintTokenPriceEth = 50000000000000000; // 0.050 ETH
     uint256 public MintTokenPriceUsdc = 50000000000000000000; // 50 USDT
-    uint32 public NickNameChangePriceEthMillis = 100* 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
     
 	bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;  
     Counters.Counter private _tokenIdCounter;
@@ -60,7 +63,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         CurrentPublicSupply = MaxTotalSupply - reserveSupply - maxBreedSupply;        
 		_setDefaultRoyalty(msg.sender, 850);
 	    //reserveMint(msg.sender, 1);
-        pause();
+        _pause();
 	}
 
 	function getRewardContract() public pure returns(address) {
@@ -94,12 +97,17 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         BreedTokensContractIsErc1155 = isErc1155;        
 	}  
 
-	function setFreeMintAllowed(bool allow) external onlyOwner {
-      FreeMintAllowed = allow;
+	function setMintOptionsAllowed(bool freeMintAllowed, bool breedMintAllowed, bool publicMintAllowed) external onlyOwner {
+        if (freeMintAllowed != FreeMintAllowed)
+            FreeMintAllowed = freeMintAllowed;
+        if (breedMintAllowed != BreedMintAllowed)
+            BreedMintAllowed = breedMintAllowed;
+        if (publicMintAllowed != PublicMintAllowed)
+            PublicMintAllowed = publicMintAllowed;            
     }  
 
     // Opensea json metadata format interface
-    function contractURI() public view returns (string memory) {
+    function contractURI() external view returns (string memory) {
         return TokenUriLogic.contractURI();        
      }
 
@@ -114,7 +122,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         return tokenId;
     }	
 
-    function reserveMint(address to, uint16 quantity) public onlyOwner {
+    function reserveMint(address to, uint16 quantity) external onlyOwner {
         require(quantity > 0, "cannot be zero");
         require(CurrentReserveSupply >= quantity, "no reserve");
         CurrentReserveSupply = CurrentReserveSupply - quantity;
@@ -148,6 +156,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
     */     
 
     function breedMint(uint16 quantity, uint256[] calldata breedtokens) public {
+        require(BreedMintAllowed, "not allowed");
         require(BreedTokensContract != address(0), "no breed");
         require(quantity > 0, "cannot be zero");        
 		require(msg.sender == tx.origin, "no bots");        
@@ -161,14 +170,16 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 		    BreedTokenIds[breedtokens[i]] = internalMint(msg.sender);
         }
         CurrentBreedSupply = CurrentBreedSupply + quantity;
+        BreedAddressCount[msg.sender] = BreedAddressCount[msg.sender] + quantity;
         YieldToken.updateRewardOnMint(msg.sender, quantity);           
     }
 	
 	function publicMint(address user, uint16 quantity) internal  {
+        require(PublicMintAllowed, "not allowed");
         require(quantity > 0, "cannot be zero");
 		//require(msg.sender == tx.origin, "no bots");		
         require(CurrentPublicSupply >= quantity);	
-		require(balanceOf(user) + quantity <= MintMaxTotalBalance, "too many");
+		require(balanceOf(user) - BreedAddressCount[user] + quantity <= MintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
         {
 		    internalMint(user);
@@ -177,7 +188,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         YieldToken.updateRewardOnMint(user, quantity);
 	}
 
-    function publicMintFree() public {
+    function publicMintFree() external {
 		require(FreeMintAllowed, "not allowed");	 
         publicMint(msg.sender, 1);       
     }
@@ -212,11 +223,11 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         publicMint(msg.sender, quantity);       
     }       
 				
-    function pause() public onlyOwner {
+    function pause() external onlyOwner {
         _pause();
     }
 
-    function unpause() public onlyOwner {
+    function unpause() external onlyOwner {
         _unpause();
     }	
 
@@ -260,19 +271,28 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 		MintMaxTotalBalance = mintMaxTotalBalance;
 	}
 
-    function withdraw(uint256 amount) public /*payable*/ onlyOwner {
+    function withdraw(uint256 amount, uint32 tokenchoice) external /*payable*/ onlyOwner {
         uint256 balance = address(this).balance;
         require(amount < balance);
-        (bool success, ) = payable(/*msg.sender*/RewardContract).call{value: amount}("");
+        bool success;
+        if (tokenchoice == 0) {
+            success = _tokenWEth.transfer(RewardContract, amount);
+        }
+        else if (tokenchoice == 1) {
+            success = _tokenUsdc.transfer(RewardContract, amount);
+        }
+        else {
+            (success, ) = payable(/*msg.sender*/RewardContract).call{value: amount}("");
+        }
 		require(success, "Failed to send Ether");
     }	  
 
-    function getNickName(uint256 tokenId) public view returns (string memory ) {
+    function getNickName(uint256 tokenId) external view returns (string memory ) {
          require(_exists(tokenId), "token err");
          return string(TokenIdNickName[tokenId]);
     }
 
-    function validateNickName(string memory str) public pure returns (bool){
+    function validateNickName(string calldata str) public pure returns (bool){
 		bytes memory b = bytes(str);
 		if(b.length < 1) return false;
 		if(b.length > 16) return false;
@@ -317,7 +337,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         }        
     }
 
-	function setNickName(uint256 tokenId, string calldata nickname) public {
+	function setNickName(uint256 tokenId, string calldata nickname) external {
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
@@ -326,7 +346,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         TokenIdNickName[tokenId] = nickname;
     }    
 
-	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) public {
+	function setTraitValue(uint256 tokenId, uint8 traitId, uint8 traitValue) external {
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");        
         TraitChangeCost memory tc = TokenUriLogic.getTraitCost(traitId);
@@ -342,7 +362,7 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         else {
               cost = cost + tc.decreaseStepCostEthMillis * (currentValue - traitValue);
         }
-        spendYieldTokens(msg.sender, cost * 1000000000000000); 
+        spendYieldTokens(msg.sender, (cost * 1000000000000000)); 
         TokenUriLogic.setTraitValue(tokenId, traitId, traitValue);
 	}	    	
 		
