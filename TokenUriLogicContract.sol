@@ -40,11 +40,11 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
 	function setChageTraitPrice(uint8 traitId, bool allowed, uint32 changeCostEthMillis, uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis, uint8 minValue, uint8 maxValue) internal  {
         require (msg.sender == address(MainContract) || msg.sender == owner());
         require (traitId < 8, "trait err");
-        TraitChangeCost memory tc = TraitChangeCost(allowed, changeCostEthMillis, increaseStepCostEthMillis, decreaseStepCostEthMillis, minValue, maxValue);
+        TraitChangeCost memory tc = TraitChangeCost(minValue, maxValue, allowed, changeCostEthMillis, increaseStepCostEthMillis, decreaseStepCostEthMillis);
 		TraitChangeCosts[traitId] = tc;
 	} 
 
-    function randInitTokenDNA(uint256 tokenId) public {
+    function randInitTokenDNA(uint256 tokenId) external {
        require (msg.sender == address(MainContract));
         uint64 dnabody = uint64(((block.timestamp + block.difficulty + tokenId) % 255)<<5*8);
         uint64 dnathroat = uint64(((block.timestamp + tokenId) % 255)<<4*8);
@@ -240,7 +240,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
 			);	        
     }    
 
-    function tokenURI(address tokenOwner, uint256 tokenId) public view returns (string memory) {
+    function tokenURI(address tokenOwner, uint256 tokenId) external view returns (string memory) {
 		bytes memory dataURI = bytes.concat(
 			'{'
 				'"name": "MBB ', 
@@ -267,7 +267,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
     }	   
 
     // Opensea json metadata format interface
-    function contractURI() public view returns (string memory) {       
+    function contractURI() external view returns (string memory) {       
         bytes memory dataURI = bytes.concat(
         '{',
             '"name": "MutantBitBirds",',
