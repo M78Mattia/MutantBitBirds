@@ -1,7 +1,7 @@
 # MutantBitBirds
 Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits
 
-Experiment based on excellent Daibiri work!
+Experiment based on excellent Dabiri work!
 https://github.com/nft-fun
 
 Evolving to a free contract template with tokenomics and on-chain traits with svg dynamic nfts (no need to external storage)
