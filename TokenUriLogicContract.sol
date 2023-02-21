@@ -168,7 +168,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
 
 	function generateCharacter(uint256 tokenId) internal view returns(bytes memory) {
         uint256 dayHour = (block.timestamp%86400)/3600;
-        bool isNight = ((dayHour >= 20) && (dayHour <= 4));
+        bool isNight = ((dayHour >= 20) || (dayHour <= 4));
  		bytes memory svg = bytes.concat(
 		/*	'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin meet" viewBox="0 0 250 250">',
 			'<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>',
