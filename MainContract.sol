@@ -28,10 +28,10 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
     TokenUriLogicContract public TokenUriLogic;
     address public BreedTokensContract = address(0);   
     bool BreedTokensContractIsErc1155;
-    bool YieldTokenWithdrawalAllowed = false;
-    bool FreeMintAllowed = false;
-    bool PublicMintAllowed = false; 
-    bool BreedMintAllowed = false;        
+    bool public YieldTokenWithdrawalAllowed = false;
+    bool public FreeMintAllowed = false;
+    bool public PublicMintAllowed = false; 
+    bool public BreedMintAllowed = false;        
 	     
     mapping(address => uint16) public BreedAddressCount;
     mapping(uint256 => uint256) public BreedTokenIds;   
@@ -275,10 +275,10 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         uint256 balance = address(this).balance;
         require(amount < balance);
         bool success;
-        if (tokenchoice == 0) {
+        if (tokenchoice == 1) {
             success = _tokenWEth.transfer(RewardContract, amount);
         }
-        else if (tokenchoice == 1) {
+        else if (tokenchoice == 2) {
             success = _tokenUsdc.transfer(RewardContract, amount);
         }
         else {
