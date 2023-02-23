@@ -45,10 +45,24 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
 	} 
 
     function randInitTokenDNA(uint256 tokenId) external {
-       require (msg.sender == address(MainContract));
-        uint64 dnabody = uint64(((block.timestamp + block.difficulty + tokenId) % 255)<<5*8);
+        require (msg.sender == address(MainContract));
+        uint64 dnaeye = uint64((block.timestamp * tokenId) % 1000);
+        if (dnaeye <= 47)
+            dnaeye = uint64(((block.timestamp * tokenId) % 1000)<<2*8);
+        else
+            dnaeye = 0;
+        uint64 dnabeak = uint64((block.timestamp * tokenId) % 1000);
+        if (dnabeak <= 7)
+            dnabeak = ((3)<<3*8);
+        else if (dnabeak <= 47)
+            dnabeak = ((2)<<3*8);       
+        else if (dnabeak <= 500)
+            dnabeak = ((1)<<3*8);      
+        else
+            dnabeak = 0;                           
         uint64 dnathroat = uint64(((block.timestamp + tokenId) % 255)<<4*8);
-        TokenIdDNA[tokenId] = (dnabody + dnathroat);
+        uint64 dnahead = uint64(((block.timestamp + block.difficulty + tokenId) % 255)<<5*8);
+        TokenIdDNA[tokenId] = (dnaeye + dnabeak + dnathroat + dnahead);
     }   
 
 	function getTraitValues(uint256 tokenId) internal view returns (uint8[] memory ) {
@@ -113,8 +127,9 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
                                 ',', 
                                 bytes(Strings.toString(b & 255)), 
                                 ')');
-    }    	
+    }
 
+   /*
     function getBasicBirdHead(uint8 traitval) internal pure returns (bytes memory) {
         bytes memory basic_bird_shape_poly = "\"8,23 8,19 7,18 6,17 6,9 7,8 7,7 8,6 9,5 10,5 11,4 12,4 13,5 14,6 15,7 15,18 14,19 13,20 13,23\"";
         return bytes.concat(
@@ -138,18 +153,60 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
         bytes memory  basic_bird_beak_poly = "\"12,13 17,13 18,14 18,18 17,17 12,17\"";       
         return bytes.concat(
             "<polyline points=", bytes(basic_bird_beak_poly), " stroke=\"black", "\" />",
-            "<polyline points=", bytes(basic_bird_beak_poly), " fill=\"", /*getRgbFromTraitVal(traitval)*/beakColor, "\" />"
+            "<polyline points=", bytes(basic_bird_beak_poly), " fill=\"", beakColor, "\" />"
         );
     }  
-    
-   function getBirdEyes(bool crazy) internal pure returns (bytes memory) {
+    */
+
+    function getBirdEyes(/*bool crazy*/) internal pure returns (bytes memory) {
+       /*
         bytes memory  eyes_poly = "<rect x=\"10\" y=\"10\" width=\"2\" height=\"2\" fill=\"white\" /><rect x=\"13\" y=\"10\" width=\"2\" height=\"2\" fill=\"white\" />";
         bytes memory  eyes_dot = "<rect x=\"10\" y=\"11\" width=\"1\" height=\"1\" fill=\"black\" /><rect x=\"13\" y=\"11\" width=\"1\" height=\"1\" fill=\"black\" />";
         bytes memory  eyes_dot_crazy = "<rect x=\"10\" y=\"11\" width=\"1\" height=\"1\" fill=\"red\" /><rect x=\"13\" y=\"11\" width=\"1\" height=\"1\" fill=\"red\" />";
         if (crazy)
             return bytes.concat(bytes(eyes_poly), bytes(eyes_dot_crazy));
         return bytes.concat(bytes(eyes_poly), bytes(eyes_dot));
+        */
+        return bytes.concat("<rect class=\"ew\" x=\"275\" y=\"200\" width=\"40\" height=\"40\" rx=\"3\" stroke=\"black\" stroke-width=\"0.25%\" />",
+                "<rect class=\"ey\" x=\"275\" y=\"220\" width=\"20\" height=\"20\" rx=\"3\" stroke=\"black\" stroke-width=\"0.25%\" />",
+                "<rect class=\"ew\" x=\"215\" y=\"200\" width=\"40\" height=\"40\" rx=\"3\" stroke=\"black\" stroke-width=\"0.25%\" />",
+                "<rect class=\"ey\" x=\"215\" y=\"220\" width=\"20\" height=\"20\" rx=\"3\" stroke=\"black\" stroke-width=\"0.25%\" />");
+
     }  
+
+
+    function getBirdLayout(uint8 shapetype) internal pure returns (bytes memory) {
+        if (shapetype == 0) { // basic 
+            return  bytes.concat("<path class=\"hd\" d=\"M170,480l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65\" stroke=\"black\" stroke-width=\"2%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"th\" d=\"M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"bk\" d=\"M235,275l110,0l20,25l0,80l-10,-25l-120,0\" stroke=\"black\" stroke-width=\"2%\" />");
+
+        }
+        else if (shapetype == 1) { // jay
+            return  bytes.concat("<path class=\"hd\" d=\"M170,480 l0,-90l-35,-50l0,-155l-60,-120l140,0l20,5l80,80l6,10l0,176l-5,0l0,40l-40,40l0,65\" stroke=\"black\" stroke-width=\"2%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"th\" d=\"M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"bk\" d=\"M235,275l110,0l20,25l0,80l-10,-25l-120,0\" stroke=\"black\" stroke-width=\"2%\" />");
+        }
+        else if (shapetype == 2) { // whoodpecker
+            return  bytes.concat("<path class=\"hd\" d=\"M170,480 l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65\" stroke=\"black\" stroke-width=\"2%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"th\" d=\"M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"bk\" d=\"M245,285l225,0l-20,25l-75,35l-130,0\" stroke=\"black\" stroke-width=\"2%\" />");
+
+        }
+        else if (shapetype == 3) { // eagle
+            return  bytes.concat("<path class=\"hd\" d=\"M170,480 l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65\" stroke=\"black\" stroke-width=\"2%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"th\" d=\"M172,480l0,-70l102,20l0,51\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"bk\" d=\"M235,270l100,0l40,35l0,80l-20,-25l-120,0\" stroke=\"black\" stroke-width=\"2%\" />");
+        }
+        else /*if (shapetype == 4)*/ { // cockatoo
+            return  bytes.concat("<path class=\"hd\" d=\"M170,480l0,-90l-35,-50l0,-115l25,-49l60,-25l60,0l41,30l0,155l-5,0l0,40l-40,40l0,65\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"cr\" d=\"M321,181l0,-50l5,-50l10,-50l10,-20l0-5l-5,0l-30,10l-30,30l-12,30l-10,30l-2,25l1,-15l-30,-30l0,-50l3,-20l-10,0l-10,5l-25,35l0,70l5,20l-5,-20l-30,-10l-10,-10l-10,-30l0,-20l-10,0l-15,20l-5,30l0,20l10,20l40,40l-10,-10l-40,0l-40,-10l-5,0l0,10l20,25l20,10l20,10l14,55l20,-60l50,-45l60,-10l29,0l15,11z\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"th\" d=\"M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66\" stroke=\"black\" stroke-width=\"0.15%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"ol\" d=\"M275,481l0,-65l40,-40l0,-40l5,0l0,-205l5,-50l10,-50l10,-20l0-5l-5,0l-30,10l-30,30l-12,30l-10,30l-2,25l1,-15l-30,-30l0,-50l3,-20l-10,0l-10,5l-25,35l0,70l5,20l-5,-20l-30,-10l-10,-10l-10,-30l0,-20l-10,0l-15,20l-5,30l0,20l10,20l40,40l-10,-10l-40,0l-40,-10l-5,0l0,10l20,25l20,10l20,10l14,55l0,63l35,50l0,91M118,220l10,5\" stroke=\"black\" stroke-width=\"2%\" stroke-linejoin=\"round\" />",
+                    "<path class=\"bk\" d=\"M235,275l110,0l20,25l0,60l-10,-25l-20,0l-15,25l-85,0\" stroke=\"black\" stroke-width=\"2%\" />");
+        }                        
+        
+    }
 
    function generateCharacterSvg(uint256 tokenId) internal view returns (bytes memory) {
        uint8[] memory traits = getTraitValues(tokenId);        
@@ -158,11 +215,32 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
         Green = ((Color >> 2) & 0x07) * 255 / 7
         Blue  = (Color & 0x03) * 255 / 3
         */ 
+        bytes memory eycolor = "rgb(0, 0, 0)";
+        bytes memory ewcolor = "rgb(240,248,255)";
+        if (traits[2] == 1) {
+            eycolor = "rgb(154, 0, 0)";
+            ewcolor = getRgbFromTraitVal(traits[2]);
+        }
+        bytes memory beakColor = 'grey';
+        if (traits[3] == 1) beakColor = 'gold';
+        else if (traits[3] == 2) beakColor = 'red';
+        else if (traits[3] == 3) beakColor = 'black';
         return bytes.concat(
+        //<style type="text/css">.hd{fill:rgb(138,28,94);}.ew{fill:rgb(240,248,255);}.th, .cr {fill:rgb(8,32,220);}.bk{fill:rgb(152,152,152);}.ol{fill:rgba(0,0,0,0);}</style>
+        "<style type=\"text/css\">.hd{fill:", getRgbFromTraitVal(traits[5]),
+        ";}.ey{fill:", eycolor,
+        ";}.ew{fill:", ewcolor,
+        ";}.th, .cr {fill:", getRgbFromTraitVal(traits[4]),
+        ";}.bk{fill:", beakColor,
+        ";}.ol{fill:rgba(0,0,0,0);}</style>",
+        getBirdLayout(traits[1]),
+        getBirdEyes()
+        /*
         getBasicBirdHead(traits[5]),
         getBasicBirdThroat(traits[4]),
         getBasicBirdBeak(traits[3]),
         getBirdEyes(traits[2] != 0)
+        */
         );
     }              
 
@@ -182,8 +260,10 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
 			'</svg>'
         */
         '<?xml version="1.0" encoding="UTF-8"?>',
-        '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMinYMin meet">',
-        '<rect x="0" y="0" width="24" height="24" fill="',
+        //'<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMinYMin meet">',
+        '<svg x="0px" y="0px" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMinYMin meet">',
+        //'<rect x="0" y="0" width="24" height="24" fill="',
+        '<rect x="0" y="0" width="480" height="480" fill="',
         (isNight ? bytes('rgb(37,150,190)') : bytes('rgb(238,238,238)')),
         '" />',
         generateCharacterSvg(tokenId),
