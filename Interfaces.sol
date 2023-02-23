@@ -11,11 +11,11 @@ interface IMainContract {
 
 interface ITraitChangeCost {
     struct TraitChangeCost {
+        uint8 minValue;
+        uint8 maxValue;    
         bool allowed;
         uint32 changeCostEthMillis;
         uint32 increaseStepCostEthMillis;
         uint32 decreaseStepCostEthMillis;
-        uint8 minValue;
-        uint8 maxValue;
     }
 }
