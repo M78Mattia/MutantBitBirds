@@ -29,9 +29,9 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
     address public BreedTokensContract = address(0);   
     bool BreedTokensContractIsErc1155;
     bool public YieldTokenWithdrawalAllowed = false;
-    bool public FreeMintAllowed = false;
-    bool public PublicMintAllowed = false; 
-    bool public BreedMintAllowed = false;        
+    bool private FreeMintAllowed = false;
+    bool private PublicMintAllowed = false; 
+    bool private BreedMintAllowed = false;        
 	     
     mapping(address => uint16) public BreedAddressCount;
     mapping(uint256 => uint256) public BreedTokenIds;   
@@ -39,8 +39,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 	uint16 public MaxTotalSupply; 
 	uint16 public MaxBreedSupply;
     uint16 public CurrentBreedSupply = 0;    
-	uint16 public CurrentReserveSupply;    
-	uint16 public CurrentPublicSupply;              
+	uint16 public CurrentPrivateReserve;    
+	uint16 public CurrentPublicReserve;              
 	uint16 public MintMaxTotalBalance = 5;
 	uint32 public NickNameChangePriceEthMillis = 100* 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)    
 	uint256 public MintTokenPriceEth = 50000000000000000; // 0.050 ETH
@@ -59,8 +59,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 	    require(reserveSupply + maxBreedSupply <= maxTotalSupply, "err reserve");
         MaxTotalSupply = maxTotalSupply;
         MaxBreedSupply = maxBreedSupply;
-        CurrentReserveSupply = reserveSupply;
-        CurrentPublicSupply = MaxTotalSupply - reserveSupply - maxBreedSupply;        
+        CurrentPrivateReserve = reserveSupply;
+        CurrentPublicReserve = MaxTotalSupply - reserveSupply - maxBreedSupply;        
 		_setDefaultRoyalty(msg.sender, 850);
 	    //reserveMint(msg.sender, 1);
         _pause();
@@ -124,8 +124,8 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
 
     function reserveMint(address to, uint16 quantity) external onlyOwner {
         require(quantity > 0, "cannot be zero");
-        require(CurrentReserveSupply >= quantity, "no reserve");
-        CurrentReserveSupply = CurrentReserveSupply - quantity;
+        require(CurrentPrivateReserve >= quantity, "no reserve");
+        CurrentPrivateReserve = CurrentPrivateReserve - quantity;
         for (uint i = 0; i < quantity; i++) 
 		    internalMint(to);
     }
@@ -178,13 +178,13 @@ contract MutantBitBirds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC2981,
         require(PublicMintAllowed, "not allowed");
         require(quantity > 0, "cannot be zero");
 		//require(msg.sender == tx.origin, "no bots");		
-        require(CurrentPublicSupply >= quantity);	
+        require(CurrentPublicReserve >= quantity);	
 		require(balanceOf(user) - BreedAddressCount[user] + quantity <= MintMaxTotalBalance, "too many");
         for (uint i = 0; i < quantity; i++) 
         {
 		    internalMint(user);
         }
-        CurrentPublicSupply = CurrentPublicSupply - quantity;	
+        CurrentPublicReserve = CurrentPublicReserve - quantity;	
         YieldToken.updateRewardOnMint(user, quantity);
 	}
 
