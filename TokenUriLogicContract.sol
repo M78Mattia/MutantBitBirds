@@ -28,7 +28,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
         //      uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis, 
         //      uint8 minValue, uint8 maxValue)
         //setChageTraitPrice(0, true, 100, 0, 0, 0, 255); // undef
-        setChageTraitPrice(1, true, 0, 0, 100*1000, 0, 4); // type
+        setChageTraitPrice(1, true, 0, 100*1000, 0, 0, 4); // type
         setChageTraitPrice(2, true, 0, 50*1000, 0, 0, 2); // eyes
         setChageTraitPrice(3, true, 0, 20*1000, 0, 0, 3); // beak
         setChageTraitPrice(4, true, 1*1000, 0, 0, 0, 255); // throat
@@ -305,8 +305,8 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost{
                 bytes(MainContract.getNickName(tokenId)),     
                 ' #',                           
                 bytes(tokenId.toString()),
-                ' owned: ',   
-                bytes(MainContract.balanceOf(tokenOwner).toString()),
+                //' owned: ',   
+                //bytes(MainContract.balanceOf(tokenOwner).toString()),
                 '",'
 				'"description": "MutantBitBirds, Earn and Mutate",'
 				'"image": "', 
