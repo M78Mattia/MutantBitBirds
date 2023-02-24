@@ -39,6 +39,10 @@ Already deployed on groeli testnet at:
 https://goerli.etherscan.io/address/0x7Cc5b6d10071cc2E13e74955786b038A0D64d075#readContract<br />
 <br />
 0xb8018eaeCFE6448d129A5edDB76fe5BF4693B17C (MutantCawSeed MCS)<br />
+https://goerli.etherscan.io/address/0xb8018eaeCFE6448d129A5edDB76fe5BF4693B17C#readContract
+<br />
+0x8be6f61210df4a069620316739924Ce97B95C917 (TokeUri Logic)<br />
+https://goerli.etherscan.io/address/0x8be6f61210df4a069620316739924Ce97B95C917#readContract
 
 -----------------------------------------------------------------------------
 
