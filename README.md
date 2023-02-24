@@ -24,7 +24,7 @@ This is a first draft of a mintable NFT with on-chain traits.
 
 First dynamic svg MutantBitBird is actually flying on testnet !
 
-Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-1
+Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-3
 
 ---------------------------------------------------------------------------------------------
 Tokenomics 
@@ -35,10 +35,10 @@ Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, 
 
 Already deployed on groeli testnet at:
 
-0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f (MutantBitBirds MBB)<br />
-https://goerli.etherscan.io/address/0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f#readContract<br />
+0x7Cc5b6d10071cc2E13e74955786b038A0D64d075 (MutantBitBirds MBB)<br />
+https://goerli.etherscan.io/address/0x7Cc5b6d10071cc2E13e74955786b038A0D64d075#readContract<br />
 <br />
-0xC961e7e4D5a7451817111BE3087ee69fa1603054 (MutantCawSeed MCS)<br />
+0xb8018eaeCFE6448d129A5edDB76fe5BF4693B17C (MutantCawSeed MCS)<br />
 
 -----------------------------------------------------------------------------
 
@@ -46,4 +46,4 @@ Test page here (wip):
 https://rubykitties.tk/bitBirds.html
 
 Previous build:
-0xEC0F6e17668dA43BCF6A620BAe5B853874baaD67
+0x016fDf76a0180Fa438c286A9de7aC5aB8DD9746f
