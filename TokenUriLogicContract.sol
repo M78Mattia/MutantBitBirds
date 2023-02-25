@@ -34,6 +34,14 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         setChageTraitPrice(7, true, 0, 1 * 1000, 0, 0, 255); // stamina
     }
 
+    function cloneTokenUriLogic(address tokenUriLogic) external onlyOwner {
+        uint256 i = 1;
+        while (TokenUriLogicContract(tokenUriLogic).TokenIdDNA(i) > 0) {
+            TokenIdDNA[i] = TokenUriLogicContract(tokenUriLogic).TokenIdDNA(i);
+            i = i+1;
+        }
+    }    
+
     function setChageTraitPrice(
         uint8 traitId,
         bool allowed,
@@ -176,7 +184,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
-    function getBirdLayout(uint8 shapetype)
+    function getBirdLayout(uint8 shapetype, bytes memory filterRef)
         internal
         pure
         returns (bytes memory)
@@ -185,33 +193,33 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             // basic
             return
                 bytes.concat(
-                    '<path class="hd" d="M170,480l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" />',
-                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="bk" d="M235,275l110,0l20,25l0,80l-10,-25l-120,0" stroke-width="2%" />'
+                    '<path class="hd" d="M170,480l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="bk" d="M235,275l110,0l20,25l0,80l-10,-25l-120,0" stroke-width="2%" ', filterRef, '/>'
                 );
         } else if (shapetype == 1) {
             // jay
             return
                 bytes.concat(
-                    '<path class="hd" d="M170,480 l0,-90l-35,-50l0,-155l-60,-120l140,0l20,5l80,80l6,10l0,176l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" />',
-                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="bk" d="M235,275l110,0l20,25l0,80l-10,-25l-120,0" stroke-width="2%" />'
+                    '<path class="hd" d="M170,480 l0,-90l-35,-50l0,-155l-60,-120l140,0l20,5l80,80l6,10l0,176l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="bk" d="M235,275l110,0l20,25l0,80l-10,-25l-120,0" stroke-width="2%" ', filterRef, '/>'
                 );
         } else if (shapetype == 2) {
             // whoodpecker
             return
                 bytes.concat(
-                    '<path class="hd" d="M170,480 l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" />',
-                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="bk" d="M245,285l225,0l-20,25l-75,35l-130,0" stroke-width="2%" />'
+                    '<path class="hd" d="M170,480 l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="bk" d="M245,285l225,0l-20,25l-75,35l-130,0" stroke-width="2%" ', filterRef, '/>'
                 );
         } else if (shapetype == 3) {
             // eagle
             return
                 bytes.concat(
-                    '<path class="hd" d="M170,480 l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" />',
-                    '<path class="th" d="M172,480l0,-70l102,20l0,51" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="bk" d="M235,270l100,0l40,35l0,80l-20,-25l-120,0" stroke-width="2%" />'
+                    '<path class="hd" d="M170,480 l0,-90l-35,-50l0,-155l45,-69l40,-30l46,0l55,60l0,190l-5,0l0,40l-40,40l0,65" stroke-width="2%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="th" d="M172,480l0,-70l102,20l0,51" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="bk" d="M235,270l100,0l40,35l0,80l-20,-25l-120,0" stroke-width="2%" ', filterRef, '/>'
                 );
         }
         /*if (shapetype == 4)*/
@@ -219,11 +227,11 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             // cockatoo
             return
                 bytes.concat(
-                    '<path class="hd" d="M170,480l0,-90l-35,-50l0,-115l25,-49l60,-25l60,0l41,30l0,155l-5,0l0,40l-40,40l0,65" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="cr" d="M321,181l0,-50l5,-50l10,-50l10,-20l0-5l-5,0l-30,10l-30,30l-12,30l-10,30l-2,25l1,-15l-30,-30l0,-50l3,-20l-10,0l-10,5l-25,35l0,70l5,20l-5,-20l-30,-10l-10,-10l-10,-30l0,-20l-10,0l-15,20l-5,30l0,20l10,20l40,40l-10,-10l-40,0l-40,-10l-5,0l0,10l20,25l20,10l20,10l14,55l20,-60l50,-45l60,-10l29,0l15,11z" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" />',
-                    '<path class="ol" d="M275,481l0,-65l40,-40l0,-40l5,0l0,-205l5,-50l10,-50l10,-20l0-5l-5,0l-30,10l-30,30l-12,30l-10,30l-2,25l1,-15l-30,-30l0,-50l3,-20l-10,0l-10,5l-25,35l0,70l5,20l-5,-20l-30,-10l-10,-10l-10,-30l0,-20l-10,0l-15,20l-5,30l0,20l10,20l40,40l-10,-10l-40,0l-40,-10l-5,0l0,10l20,25l20,10l20,10l14,55l0,63l35,50l0,91M118,220l10,5" stroke-width="2%" stroke-linejoin="round" />',
-                    '<path class="bk" d="M235,275l110,0l20,25l0,60l-10,-25l-20,0l-15,25l-85,0" stroke-width="2%" />'
+                    '<path class="hd" d="M170,480l0,-90l-35,-50l0,-115l25,-49l60,-25l60,0l41,30l0,155l-5,0l0,40l-40,40l0,65" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="cr" d="M321,181l0,-50l5,-50l10,-50l10,-20l0-5l-5,0l-30,10l-30,30l-12,30l-10,30l-2,25l1,-15l-30,-30l0,-50l3,-20l-10,0l-10,5l-25,35l0,70l5,20l-5,-20l-30,-10l-10,-10l-10,-30l0,-20l-10,0l-15,20l-5,30l0,20l10,20l40,40l-10,-10l-40,0l-40,-10l-5,0l0,10l20,25l20,10l20,10l14,55l20,-60l50,-45l60,-10l29,0l15,11z" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="th" d="M193,480l0,-99l30,-45l91,0l0,39l-40,40l0,66" stroke-width="0.15%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="ol" d="M275,481l0,-65l40,-40l0,-40l5,0l0,-205l5,-50l10,-50l10,-20l0-5l-5,0l-30,10l-30,30l-12,30l-10,30l-2,25l1,-15l-30,-30l0,-50l3,-20l-10,0l-10,5l-25,35l0,70l5,20l-5,-20l-30,-10l-10,-10l-10,-30l0,-20l-10,0l-15,20l-5,30l0,20l10,20l40,40l-10,-10l-40,0l-40,-10l-5,0l0,10l20,25l20,10l20,10l14,55l0,63l35,50l0,91M118,220l10,5" stroke-width="2%" stroke-linejoin="round" ', filterRef, '/>',
+                    '<path class="bk" d="M235,275l110,0l20,25l0,60l-10,-25l-20,0l-15,25l-85,0" stroke-width="2%" ', filterRef, '/>'
                 );
         }
     }
@@ -256,41 +264,41 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         bytes memory throatColor,
         bytes memory headColor
     ) internal pure returns (bytes memory) {
-        bytes memory filterRef = "";
-        if (nightly) {
-            filterRef = bytes(';filter="url(#sofGlow)"');
-        }
+        //bytes memory filterRef = "";
+        //if (nightly) {
+        //    filterRef = bytes(';filter="url(#sofGlow)"');
+        //}
         bytes memory p1 = bytes.concat(
             //<style type="text/css">.hd{fill:rgb(138,28,94);}.ew{fill:rgb(240,248,255);}.th, .cr {fill:rgb(8,32,220);}.bk{fill:rgb(152,152,152);}.ol{fill:rgba(0,0,0,0);}</style>
             '<style type="text/css">.hd{fill:',
             headColor,
             ";stroke:",
             (nightly ? headColor : bytes("black")),
-            filterRef,
+            //filterRef,
             ";}.ey{fill:",
             eycolor,
             ";stroke:",
             /*nightly ? getRgbFromTraitVal(traits[5]) :*/
             bytes("black"),
-            filterRef,
+            //filterRef,
             ";}.ew{fill:",
             ewcolor,
             ";stroke:",
             /*(nightly ? ewcolor : bytes("black")*/
-            bytes("black"),
-            filterRef
+            bytes("black")//,
+            //filterRef
         );
         bytes memory p2 = bytes.concat(
             ";}.th, .cr {fill:",
             throatColor,
             ";stroke:",
             (nightly ? throatColor : bytes("black")),
-            filterRef,
+            //filterRef,
             ";}.bk{fill:",
             beakColor,
             ";stroke:",
             (nightly ? beakColor : bytes("black")),
-            filterRef,
+            //filterRef,
             ";}.ol{fill:rgba(0,0,0,0);}</style>"
         );
         return bytes.concat(p1, p2);
@@ -323,7 +331,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
                     getRgbFromTraitVal(traits[5])
                 ),
                 (nightly ? generateCharacterFilter(ownedcount) : bytes(" ")),
-                getBirdLayout(getTraitValue(tokenId, 1)),
+                getBirdLayout(getTraitValue(tokenId, 1), ((nightly) ? bytes(' filter="url(#sofGlow)" ') : bytes(" "))),
                 getBirdEyes()
             );
     }
@@ -334,7 +342,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         returns (bytes memory)
     {
         uint256 dayHour = (block.timestamp % 86400) / 3600;
-        bool isNight = ((dayHour >= 20) || (dayHour <= 4));
+        bool isNight = ((dayHour >= 21) || (dayHour <= 4));
         bytes memory svg = bytes.concat(
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<svg x="0px" y="0px" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMinYMin meet">',
