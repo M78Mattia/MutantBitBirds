@@ -40,8 +40,8 @@ contract MutantBitBirds is
     bool private BreedMintAllowed = false;
 
     mapping(address => uint16) public BreedAddressCount;
-    mapping(uint256 => uint256) public BreedTokenIds;
-    mapping(uint256 => string) public TokenIdNickName;
+    mapping(uint256 => uint16) public BreedTokenIds;
+    mapping(uint16 => string) public TokenIdNickName;
     uint16 public MaxTotalSupply;
     uint16 public MaxBreedSupply;
     uint16 public CurrentBreedSupply = 0;
@@ -80,7 +80,7 @@ contract MutantBitBirds is
         CurrentPublicReserve = MaxTotalSupply - reserveSupply - maxBreedSupply;
         _setDefaultRoyalty(msg.sender, 850);
         //reserveMint(msg.sender, 1);
-        _pause();
+        //_pause();
     }
 
     function getRewardContract() public pure returns (address) {
@@ -142,8 +142,8 @@ contract MutantBitBirds is
         return TokenUriLogic.contractURI();
     }
 
-    function internalMint(address to) internal whenNotPaused returns (uint256) {
-        uint256 tokenId = _tokenIdCounter.current();
+    function internalMint(address to) internal whenNotPaused returns (uint16) {
+        uint16 tokenId = (uint16)(_tokenIdCounter.current());
         require(tokenId < MaxTotalSupply, "max supply");
         _tokenIdCounter.increment();
         tokenId = tokenId + 1;
@@ -157,7 +157,7 @@ contract MutantBitBirds is
         require(quantity > 0, "cannot be zero");
         require(CurrentPrivateReserve >= quantity, "no reserve");
         CurrentPrivateReserve = CurrentPrivateReserve - quantity;
-        for (uint256 i = 0; i < quantity; i++) internalMint(to);
+        for (uint32 i = 0; i < quantity; i++) internalMint(to);
     }
 
     function walletHoldsBreedToken(uint256 breedTokenId, address wallet)
@@ -225,7 +225,7 @@ contract MutantBitBirds is
                 MintMaxTotalBalance,
             "too many"
         );
-        for (uint256 i = 0; i < quantity; i++) {
+        for (uint32 i = 0; i < quantity; i++) {
             internalMint(user);
         }
         CurrentPublicReserve = CurrentPublicReserve - quantity;
@@ -357,7 +357,7 @@ contract MutantBitBirds is
         require(success, "Failed to send Ether");
     }
 
-    function getNickName(uint256 tokenId)
+    function getNickName(uint16 tokenId)
         external
         view
         returns (string memory)
@@ -419,7 +419,7 @@ contract MutantBitBirds is
         }
     }
 
-    function setNickName(uint256 tokenId, string calldata nickname) external {
+    function setNickName(uint16 tokenId, string calldata nickname) external {
         require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
@@ -429,7 +429,7 @@ contract MutantBitBirds is
     }
 
     function setTraitValue(
-        uint256 tokenId,
+        uint16 tokenId,
         uint8 traitId,
         uint8 traitValue
     ) external {
@@ -464,7 +464,7 @@ contract MutantBitBirds is
         override(ERC721)
         returns (string memory)
     {
-        return TokenUriLogic.tokenURI(ownerOf(tokenId), tokenId);
+        return TokenUriLogic.tokenURI(ownerOf(tokenId), (uint16)(tokenId));
     }
 
     function walletOf(address wladdress)
