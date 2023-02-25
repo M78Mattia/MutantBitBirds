@@ -15,8 +15,8 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     //string private _contractUri = "https://rubykitties.tk/MBBcontractUri";
     //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
     //string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
-    mapping(uint256 => uint64) public TokenIdDNA;
-    mapping(uint8 => TraitChangeCost) public TraitChangeCosts;
+    mapping(uint8 => TraitChangeCost) public TraitChangeCosts;    
+    mapping(uint16 => uint64) public TokenIdDNA;
 
     constructor(address maincontract) {
         MainContract = IMainContract(maincontract);
@@ -35,7 +35,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function cloneTokenUriLogic(address tokenUriLogic) external onlyOwner {
-        uint256 i = 1;
+        uint16 i = 1;
         while (TokenUriLogicContract(tokenUriLogic).TokenIdDNA(i) > 0) {
             TokenIdDNA[i] = TokenUriLogicContract(tokenUriLogic).TokenIdDNA(i);
             i = i+1;
@@ -64,7 +64,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         TraitChangeCosts[traitId] = tc;
     }
 
-    function randInitTokenDNA(uint256 tokenId) external {
+    function randInitTokenDNA(uint16 tokenId) external {
         require(msg.sender == address(MainContract));
         uint64 dnaeye = uint64((block.timestamp * tokenId) % 1000);
         if (dnaeye <= 47)
@@ -84,7 +84,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         TokenIdDNA[tokenId] = (dnaeye + dnabeak + dnathroat + dnahead);
     }
 
-    function getTraitValues(uint256 tokenId)
+    function getTraitValues(uint16 tokenId)
         internal
         view
         returns (uint8[] memory)
@@ -101,7 +101,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         return traits;
     }
 
-    function getTraitValue(uint256 tokenId, uint8 traitId)
+    function getTraitValue(uint16 tokenId, uint8 traitId)
         public
         view
         returns (uint8)
@@ -120,7 +120,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function setTraitValue(
-        uint256 tokenId,
+        uint16 tokenId,
         uint8 traitId,
         uint8 traitValue
     ) public {
@@ -305,9 +305,9 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function generateCharacterSvg(
-        uint256 tokenId,
+        uint16 tokenId,
         bool nightly,
-        uint256 ownedcount
+        uint16 ownedcount
     ) internal view returns (bytes memory) {
         uint8[] memory traits = getTraitValues(tokenId);
         bytes memory eycolor = "rgb(0, 0, 0)";
@@ -336,7 +336,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
-    function generateCharacter(uint256 tokenId, uint256 ownedcount)
+    function generateCharacter(uint16 tokenId, uint16 ownedcount)
         internal
         view
         returns (bytes memory)
@@ -389,7 +389,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
-    function getTraitAttributes(uint256 tokenId)
+    function getTraitAttributes(uint16 tokenId)
         internal
         view
         returns (bytes memory)
@@ -421,23 +421,24 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
-    function tokenURI(address tokenOwner, uint256 tokenId)
+    function tokenURI(address tokenOwner, uint16 tokenId)
         external
         view
         returns (string memory)
     {
+        uint256 id256 = tokenId;
         bytes memory dataURI = bytes.concat(
             "{"
             '"name": "MBB ',
             bytes(MainContract.getNickName(tokenId)),
             " #",
-            bytes(tokenId.toString()),
+            bytes(id256.toString()),
             //' owned: ',
             //bytes(MainContract.balanceOf(tokenOwner).toString()),
             '",'
             '"description": "MutantBitBirds, Earn and Mutate",'
             '"image": "',
-            generateCharacter(tokenId, MainContract.balanceOf(tokenOwner)),
+            generateCharacter(tokenId, (uint16)(MainContract.balanceOf(tokenOwner))),
             '",'
             '"attributes": [',
             getTraitAttributes(tokenId),
