@@ -500,8 +500,8 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         return attribs;*/
         return
             bytes.concat(
-                getTraitAttributesTType(0, traits[0]),
-                ",",
+                //getTraitAttributesTType(0, traits[0]),
+                //",",
                 getTraitAttributesTType(1, traits[1]),
                 ",",
                 getTraitAttributesTType(2, traits[2]),
