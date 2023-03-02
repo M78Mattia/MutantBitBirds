@@ -66,22 +66,34 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
 
     function randInitTokenDNA(uint16 tokenId) external {
         require(msg.sender == address(MainContract));
-        uint64 dnaeye = uint64((block.timestamp * tokenId) % 1000);
+        uint rand = uint(keccak256(abi.encodePacked(block.timestamp,msg.sender,tokenId)));
+        // offset 0 undef
+        // offset 1 type
+        // offset 2 eyes
+        // offset 3 beak
+        // offset 4 throat
+        // offset 5 head
+        // offset 6 level
+        // offset 7 stamina
+        uint64 dnaeye = uint64(rand % 1000);
         if (dnaeye <= 47)
-            dnaeye = uint64(((block.timestamp * tokenId) % 1000) << (2 * 8));
-        else dnaeye = 0;
-        uint64 dnabeak = uint64((block.timestamp * tokenId) % 1000);
+            dnaeye = uint64(rand & uint32(0x00FF0000));
+        else
+            dnaeye = 0;
+        uint64 dnabeak = uint64((rand * tokenId) % 1000);
         if (dnabeak <= 7) dnabeak = ((3) << (3 * 8));
         else if (dnabeak <= 47) dnabeak = ((2) << (3 * 8));
         else if (dnabeak <= 500) dnabeak = ((1) << (3 * 8));
-        else dnabeak = 0;
-        uint64 dnathroat = uint64(
-            ((block.timestamp + tokenId) % 255) << (4 * 8)
-        );
-        uint64 dnahead = uint64(
-            ((block.timestamp + block.difficulty + tokenId) % 255) << (5 * 8)
-        );
-        TokenIdDNA[tokenId] = (dnaeye + dnabeak + dnathroat + dnahead);
+        else dnabeak = 0;        
+        uint64 dnathroat = uint64(rand & uint32(0x000000FF)) << (3 * 8);
+        uint64 dnahead = uint64(rand & uint32(0x0000FF00)) << (3 * 8);
+        uint64 dnatype = uint64((rand * block.timestamp) % 1000);
+        if (dnatype <= 5) dnatype = ((4) << (1 * 8));
+        else if (dnatype <= 40) dnatype = ((3) << (1 * 8));
+        else if (dnatype <= 100) dnatype = ((2) << (1 * 8));
+        else if (dnatype <= 250) dnatype = ((1) << (1 * 8));
+        else dnatype = 0;        
+        TokenIdDNA[tokenId] = (dnaeye + dnabeak + dnathroat + dnahead + dnatype);
     }
 
     function getTraitValues(uint16 tokenId)
