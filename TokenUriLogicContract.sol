@@ -337,7 +337,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function generateCharacter(uint16 tokenId, uint16 ownedcount)
-        internal
+        public //internal
         view
         returns (bytes memory)
     {
@@ -359,20 +359,105 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
+    function getColorMapName(uint8 colourVal)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        uint8[256] memory colourList = [uint8(98), 110, 110, 66, 98, 110, 110, 66, 103, 116, 116, 66, 103, 116, 116, 66, 103, 116, 116, 97, 
+                                        103, 116, 116, 97, 108, 108, 97, 97, 108, 108, 97, 97, 98, 110, 110, 66, 98, 110, 110, 66, 103, 116, 
+                                        116, 66, 103, 116, 116, 66, 103, 116, 116, 97, 103, 116, 116, 97, 108, 108, 97, 97, 108, 108, 97, 97, 
+                                        109, 112, 112, 66, 109, 112, 112, 66, 111, 71, 71, 66, 111, 71, 71, 66, 111, 71, 71, 97, 111, 71, 71, 
+                                        97, 108, 71, 71, 97, 108, 108, 97, 97, 109, 112, 112, 66, 109, 112, 112, 66, 111, 71, 71, 66, 111, 71, 
+                                        71, 71, 111, 71, 71, 115, 111, 71, 71, 115, 111, 71, 115, 115, 108, 71, 115, 97, 109, 112, 112, 102, 109, 
+                                        112, 112, 102, 111, 71, 71, 102, 111, 71, 71, 115, 111, 71, 71, 115, 111, 71, 115, 115, 111, 71, 115, 115, 
+                                        121, 115, 115, 115, 109, 112, 112, 102, 109, 112, 112, 102, 111, 71, 71, 102, 111, 71, 71, 115, 111, 71, 
+                                        115, 115, 79, 71, 115, 115, 121, 115, 115, 115, 121, 121, 115, 119, 114, 114, 102, 102, 114, 114, 102, 102, 
+                                        114, 71, 71, 102, 79, 71, 115, 115, 79, 79, 115, 115, 79, 79, 115, 115, 121, 121, 115, 119, 121, 121, 115, 
+                                        119, 114, 114, 102, 102, 114, 114, 102, 102, 114, 114, 102, 102, 79, 79, 115, 102, 79, 79, 115, 115, 79, 79, 
+                                        115, 119, 121, 121, 115, 119, 121, 121, 119, 119];
+        if (colourList[colourVal] == 98/*'b'*/)
+            return  bytes('black');
+        else if (colourList[colourVal] == 110/*'n'*/)
+            return  bytes('navy');         
+        else if (colourList[colourVal] == 66/*'B'*/)
+            return  bytes('blue');             
+        else if (colourList[colourVal] == 103/*'g'*/)
+            return  bytes('green');            
+        else if (colourList[colourVal] == 116/*'t'*/)
+            return  bytes('teal');     
+        else if (colourList[colourVal] == 97/*'a'*/)
+            return  bytes('aqua');  
+        else if (colourList[colourVal] == 108/*'l'*/)
+            return  bytes('lime');       
+        else if (colourList[colourVal] == 109/*'m'*/)
+            return  bytes('maroon');     
+        else if (colourList[colourVal] == 112/*'p'*/)
+            return  bytes('purple');    
+        else if (colourList[colourVal] == 111/*'o'*/)
+            return  bytes('olive');              
+        else if (colourList[colourVal] == 71/*'G'*/)
+            return  bytes('gray');    
+        else if (colourList[colourVal] == 115/*'s'*/)
+            return  bytes('silver');      
+        else if (colourList[colourVal] == 102/*'f'*/)
+            return  bytes('fuchsia');     
+        else if (colourList[colourVal] == 121/*'y'*/)
+            return  bytes('yellow');    
+        else if (colourList[colourVal] == 79/*'O'*/)
+            return  bytes('orange');      
+        else if (colourList[colourVal] == 119/*'w'*/)
+            return  bytes('white'); 
+        else if (colourList[colourVal] == 114/*'r'*/)
+            return  bytes('red');                                                                                                                                                 
+        return  bytes('none');
+    }
+
     function getTraitAttributesTType(uint8 traitId, uint8 traitVal)
         internal
         pure
         returns (bytes memory)
     {
         bytes memory traitName;
-        if (traitId == 0) traitName = "tr-0";
-        else if (traitId == 1) traitName = "type";
-        else if (traitId == 2) traitName = "eyes";
-        else if (traitId == 3) traitName = "beak";
-        else if (traitId == 4) traitName = "throat";
-        else if (traitId == 5) traitName = "head";
-        else if (traitId == 6) traitName = "level";
-        else if (traitId == 7) traitName = "stamina";
+        bytes memory traitValue = bytes(Strings.toString(traitVal));
+        if (traitId == 0) { 
+            traitName = "tr-0";
+        }
+        else if (traitId == 1) { 
+            traitName = "type";
+            if (traitVal == 0) traitValue = "basic"; 
+            else if (traitVal == 1) traitValue = "jay";
+            else if (traitVal == 2) traitValue = "whoodpecker";
+            else if (traitVal == 3) traitValue = "eagle";
+            else /*if (traitVal == 4)*/ traitValue = "cockatoo";
+        }
+        else if (traitId == 2) { 
+            traitName = "eyes";
+            if (traitVal == 0) traitValue = "normal";
+            else traitValue = "crazy";
+        }
+        else if (traitId == 3) { 
+            traitName = "beak";
+            //traitValue = getColorMapName(traitVal);
+            if (traitVal == 0) traitValue = "grey";
+            else if (traitVal == 1) traitValue = "gold";
+            else if (traitVal == 2) traitValue = "red";
+            else /*if (traitVal == 3)*/ traitValue = "black";         
+        }
+        else if (traitId == 4) { 
+            traitName = "throat";
+            traitValue = getColorMapName(traitVal);
+        }
+        else if (traitId == 5) { 
+            traitName = "head";
+            traitValue = getColorMapName(traitVal);
+        }
+        else if (traitId == 6) { 
+            traitName = "level";
+        }
+        else if (traitId == 7) { 
+            traitName = "stamina";
+        }
         bytes memory display;
         if (traitId == 7) display = '"display_type": "boost_number",';
         else if (traitId == 6) display = '"display_type": "number",';
@@ -384,7 +469,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
                 '"trait_type": "',
                 traitName,
                 '","value": "',
-                bytes(Strings.toString(traitVal)),
+                traitValue,
                 '"}'
             );
     }
