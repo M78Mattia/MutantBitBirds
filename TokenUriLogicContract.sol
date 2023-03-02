@@ -429,8 +429,8 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         uint256 id256 = tokenId;
         bytes memory dataURI = bytes.concat(
             "{"
-            '"name": "MBB ',
-            bytes(MainContract.getNickName(tokenId)),
+            '"name": "',
+            ((bytes(MainContract.getNickName(tokenId)).length > 0) ? bytes(MainContract.getNickName(tokenId)) :  bytes("MBB")),
             " #",
             bytes(id256.toString()),
             //' owned: ',
