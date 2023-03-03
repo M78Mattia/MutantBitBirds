@@ -28,10 +28,10 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         setChageTraitPrice(1, true, 0, 100 * 1000, 0, 0, 4); // type
         setChageTraitPrice(2, true, 0, 50 * 1000, 0, 0, 2); // eyes
         setChageTraitPrice(3, true, 0, 20 * 1000, 0, 0, 3); // beak
-        setChageTraitPrice(4, true, 1 * 1000, 0, 0, 0, 255); // throat
-        setChageTraitPrice(5, true, 1 * 1000, 0, 0, 0, 255); // head
-        setChageTraitPrice(6, true, 0, 1 * 1000, 0, 0, 255); // level
-        setChageTraitPrice(7, true, 0, 1 * 1000, 0, 0, 255); // stamina
+        setChageTraitPrice(4, true, 10 * 1000, 0, 0, 0, 255); // throat
+        setChageTraitPrice(5, true, 10 * 1000, 0, 0, 0, 255); // head
+        setChageTraitPrice(6, true, 0, 5 * 1000, 0, 0, 255); // level
+        setChageTraitPrice(7, true, 0, 5 * 1000, 0, 0, 255); // stamina
     }
 
     function cloneTokenUriLogic(address tokenUriLogic) external onlyOwner {
