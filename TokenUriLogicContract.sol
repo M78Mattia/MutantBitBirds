@@ -248,7 +248,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         }
     }
 
-    function generateCharacterFilter(uint256 ownedcount)
+    function generateCharacterFilter(uint16 ownedcount)
         internal
         pure
         returns (bytes memory)
