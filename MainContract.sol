@@ -59,7 +59,7 @@ contract MutantBitBirds is
     ERC20 private _tokenWEth =
         ERC20(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6); // goerli addr
     ERC20 private _tokenUsdc =
-        ERC20(0x2f3A40A3db8a7e3D09B0adfEfbCe4f6F81927557); // goerli addr
+        ERC20(0x07865c6e87b9f70255377e024ace6630c1eaa37f); // goerli addr
 
     //bool _mintAllowWEthPayment = true;
     //bool _mintAllowUsdtPayment = true;
