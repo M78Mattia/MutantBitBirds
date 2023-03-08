@@ -1,5 +1,5 @@
 # MutantBitBirds
-Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits
+Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits and a yield token for tokenomics.
 
 Experiment based on excellent Dabiri work!
 https://github.com/nft-fun
@@ -22,7 +22,7 @@ Set TokenUriLogicContract address on the deployed MainContract (setTokenUriLogic
 
 This is a first draft of a mintable NFT with on-chain traits.
 
-First dynamic svg MutantBitBird is actually flying on testnet !
+The first dynamic MutantBitBird's svg is actually flying on goerli testnet !
 
 Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-3
 
