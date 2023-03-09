@@ -562,7 +562,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             //'/image.png",',
             //'"external_link": "',
             //bytes(_contractUri),
-            '"',
+            //'"',
             '"fee_recipient": "',
             abi.encodePacked(MainContract.getRewardContract()),
             '"'
