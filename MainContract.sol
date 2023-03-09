@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
@@ -54,12 +56,9 @@ contract MutantBitBirds is
 
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
     Counters.Counter private _tokenIdCounter;
-    address public constant RewardContract =
-        address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
-    ERC20 private _tokenWEth =
-        ERC20(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6); // goerli addr
-    ERC20 private _tokenUsdc =
-        ERC20(0x07865c6e87b9f70255377e024ace6630c1eaa37f); // goerli addr
+    address public constant RewardContract = address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
+    ERC20 private _tokenWEth = ERC20(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6); // goerli addr
+    ERC20 private _tokenUsdc = ERC20(0x2f3A40A3db8a7e3D09B0adfEfbCe4f6F81927557); // goerli addr
 
     //bool _mintAllowWEthPayment = true;
     //bool _mintAllowUsdtPayment = true;
@@ -70,10 +69,7 @@ contract MutantBitBirds is
         uint16 maxBreedSupply
     ) ERC721("MutantBitBirds", "MTB") {
         require(maxTotalSupply > 0, "err supply");
-        require(
-            reserveSupply + maxBreedSupply <= maxTotalSupply,
-            "err reserve"
-        );
+        require(reserveSupply + maxBreedSupply <= maxTotalSupply, "err reserve");
         MaxTotalSupply = maxTotalSupply;
         MaxBreedSupply = maxBreedSupply;
         CurrentPrivateReserve = reserveSupply;
@@ -146,7 +142,9 @@ contract MutantBitBirds is
         uint16 tokenId = (uint16)(_tokenIdCounter.current());
         require(tokenId < MaxTotalSupply, "max supply");
         _tokenIdCounter.increment();
-        tokenId = tokenId + 1;
+        unchecked {
+            tokenId = tokenId + 1;
+        }
         _safeMint(to, tokenId);
         TokenUriLogic.randInitTokenDNA(tokenId);
         //setRoyalties(tokenId, owner(), 1000);
@@ -157,7 +155,12 @@ contract MutantBitBirds is
         require(quantity > 0, "cannot be zero");
         require(CurrentPrivateReserve >= quantity, "no reserve");
         CurrentPrivateReserve = CurrentPrivateReserve - quantity;
-        for (uint32 i = 0; i < quantity; i++) internalMint(to);
+        for (uint32 i = 0; i < quantity; ) {
+            internalMint(to);
+            unchecked {
+                i++;
+            }
+        }
     }
 
     function walletHoldsBreedToken(uint256 breedTokenId, address wallet)
@@ -165,12 +168,12 @@ contract MutantBitBirds is
         view
         returns (bool)
     {
-        if (BreedTokensContractIsErc1155)
-            return
-                IERC1155(BreedTokensContract).balanceOf(wallet, breedTokenId) >
-                0;
-        else
+        if (BreedTokensContractIsErc1155) {
+            return IERC1155(BreedTokensContract).balanceOf(wallet, breedTokenId) > 0;
+        }
+        else {
             return IERC721(BreedTokensContract).ownerOf(breedTokenId) == wallet;
+        }
     }
 
     /*
@@ -198,20 +201,19 @@ contract MutantBitBirds is
         require(msg.sender == tx.origin, "no bots");
         require(quantity == breedtokens.length, "tokens err");
         require(CurrentBreedSupply + quantity <= MaxBreedSupply, "no reserve");
-        for (uint256 i = 0; i < quantity; i++) {
+        for (uint256 i = 0; i < quantity; ) {
             require(BreedTokenIds[breedtokens[i]] == 0, "bread yet");
             //require(isValidBreedToken(breedtokens[i]), "token err");
-            require(
-                walletHoldsBreedToken(breedtokens[i], msg.sender) ||
-                    (msg.sender == owner()),
-                "no owner"
-            );
+            require(walletHoldsBreedToken(breedtokens[i], msg.sender) || (msg.sender == owner()), "no owner");
             BreedTokenIds[breedtokens[i]] = internalMint(msg.sender);
+            unchecked {
+                i++;
+            }
         }
-        CurrentBreedSupply = CurrentBreedSupply + quantity;
-        BreedAddressCount[msg.sender] =
-            BreedAddressCount[msg.sender] +
-            quantity;
+        unchecked {
+            CurrentBreedSupply = CurrentBreedSupply + quantity;
+            BreedAddressCount[msg.sender] = BreedAddressCount[msg.sender] + quantity;
+        }
         YieldToken.updateRewardOnMint(msg.sender, quantity);
     }
 
@@ -220,15 +222,16 @@ contract MutantBitBirds is
         require(quantity > 0, "cannot be zero");
         //require(msg.sender == tx.origin, "no bots");
         require(CurrentPublicReserve >= quantity);
-        require(
-            balanceOf(user) - BreedAddressCount[user] + quantity <=
-                MintMaxTotalBalance,
-            "too many"
-        );
-        for (uint32 i = 0; i < quantity; i++) {
+        require(balanceOf(user) - BreedAddressCount[user] + quantity <= MintMaxTotalBalance, "too many");
+        for (uint32 i = 0; i < quantity;) {
             internalMint(user);
+            unchecked {
+                i++;
+            }
         }
-        CurrentPublicReserve = CurrentPublicReserve - quantity;
+        unchecked {
+            CurrentPublicReserve = CurrentPublicReserve - quantity;
+        }
         YieldToken.updateRewardOnMint(user, quantity);
     }
 
@@ -349,10 +352,7 @@ contract MutantBitBirds is
         } else if (tokenchoice == 2) {
             success = _tokenUsdc.transfer(RewardContract, amount);
         } else {
-            (success, ) = payable(
-                /*msg.sender*/
-                RewardContract
-            ).call{value: amount}("");
+            (success, ) = payable(/*msg.sender*/RewardContract).call{value: amount}("");
         }
         require(success, "Failed to send Ether");
     }
@@ -406,15 +406,8 @@ contract MutantBitBirds is
             require(YieldToken.balanceOf(user) >= amount, "cawSeed balance");
             YieldToken.burn(user, amount);
         } else {
-            require(
-                /*YieldToken.balanceOf(user) +*/
-                YieldToken.getTotalClaimable(user) >= amount,
-                "cawSeed available"
-            );
-            YieldToken.updateReward(
-                user,
-                address(0) /*, 0*/
-            );
+            require(/*YieldToken.balanceOf(user) +*/YieldToken.getTotalClaimable(user) >= amount, "cawSeed available");
+            YieldToken.updateReward(user, address(0) /*, 0*/);
             YieldToken.collect(user, amount);
         }
     }
@@ -442,16 +435,12 @@ contract MutantBitBirds is
         uint8 currentValue = TokenUriLogic.getTraitValue(tokenId, traitId);
         require(currentValue != traitValue, "currentValue");
         uint256 cost = tc.changeCostEthMillis;
-        if (traitValue > currentValue) {
-            cost =
-                cost +
-                tc.increaseStepCostEthMillis *
-                (traitValue - currentValue);
-        } else {
-            cost =
-                cost +
-                tc.decreaseStepCostEthMillis *
-                (currentValue - traitValue);
+        unchecked {
+            if (traitValue > currentValue) {
+                cost = cost + tc.increaseStepCostEthMillis * (traitValue - currentValue);
+            } else {
+                cost = cost + tc.decreaseStepCostEthMillis * (currentValue - traitValue);
+            }
         }
         spendYieldTokens(msg.sender, (cost * 1000000000000000));
         TokenUriLogic.setTraitValue(tokenId, traitId, traitValue);
@@ -474,8 +463,11 @@ contract MutantBitBirds is
     {
         uint256 ownerTokenCount = balanceOf(wladdress);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
-        for (uint256 i; i < ownerTokenCount; i++) {
-            tokenIds[i] = tokenOfOwnerByIndex(wladdress, i);
+        for (uint256 i; i < ownerTokenCount;) {
+            unchecked {
+                tokenIds[i] = tokenOfOwnerByIndex(wladdress, i);
+                i++;
+            }
         }
         return tokenIds;
     }
