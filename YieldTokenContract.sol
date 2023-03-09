@@ -37,15 +37,14 @@ contract YieldTokenContract is ERC20, Ownable {
         require(msg.sender == address(MainContract), "Can't call this");
         uint256 time = min(block.timestamp, END);
         uint256 timerUser = LastUpdate[user];
-        if (timerUser > 0) {
-            uint256 reward = Rewards[user] +
-                (MainContract.balanceOf(user) *
-                    BASE_RATE_XSEC *
-                    (time - timerUser));
-            reward = reward + amount * MINT_GIFT;
-            Rewards[user] = reward;
-        } else {
-            Rewards[user] = Rewards[user] + amount * MINT_GIFT;
+        unchecked {
+            if (timerUser > 0) {
+                uint256 reward = Rewards[user] + (MainContract.balanceOf(user) * BASE_RATE_XSEC * (time - timerUser));
+                reward = reward + amount * MINT_GIFT;
+                Rewards[user] = reward;
+            } else {
+                Rewards[user] = Rewards[user] + amount * MINT_GIFT;
+            }
         }
         LastUpdate[user] = time;
     }
@@ -60,21 +59,17 @@ contract YieldTokenContract is ERC20, Ownable {
         uint256 time = min(block.timestamp, END);
         uint256 timerFrom = LastUpdate[from];
         if (timerFrom > 0 && time > timerFrom)
-            Rewards[from] =
-                Rewards[from] +
-                (MainContract.balanceOf(from) *
-                    BASE_RATE_XSEC *
-                    (time - timerFrom));
-        if (timerFrom != END && time > timerFrom) LastUpdate[from] = time;
+            Rewards[from] = Rewards[from] + (MainContract.balanceOf(from) * BASE_RATE_XSEC * (time - timerFrom));
+        if (timerFrom != END && time > timerFrom) {
+            LastUpdate[from] = time;
+        }
         if (to != address(0)) {
             uint256 timerTo = LastUpdate[to];
             if (timerTo > 0 && time > timerTo)
-                Rewards[to] =
-                    Rewards[to] +
-                    (MainContract.balanceOf(to) *
-                        BASE_RATE_XSEC *
-                        (time - timerTo));
-            if (timerTo != END && time > timerTo) LastUpdate[to] = time;
+                Rewards[to] = Rewards[to] + (MainContract.balanceOf(to) * BASE_RATE_XSEC * (time - timerTo));
+            if (timerTo != END && time > timerTo) {
+                LastUpdate[to] = time;
+            }
         }
         //}
     }
@@ -105,10 +100,9 @@ contract YieldTokenContract is ERC20, Ownable {
     function getTotalClaimable(address user) external view returns (uint256) {
         uint256 time = min(block.timestamp, END);
         uint256 pending = 0;
-        if (LastUpdate[user] > 0 && time > LastUpdate[user])
-            pending = (MainContract.balanceOf(user) *
-                BASE_RATE_XSEC *
-                (time - LastUpdate[user]));
+        if (LastUpdate[user] > 0 && time > LastUpdate[user]) {
+            pending = (MainContract.balanceOf(user) * BASE_RATE_XSEC * (time - LastUpdate[user]));
+        }
         return Rewards[user] + pending;
     }
 }
