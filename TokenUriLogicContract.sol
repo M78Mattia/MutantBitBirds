@@ -66,7 +66,9 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
 
     function randInitTokenDNA(uint16 tokenId) external {
         require(msg.sender == address(MainContract));
-        uint rand = uint(keccak256(abi.encodePacked(block.timestamp,msg.sender,tokenId)));
+        uint256 rand = (uint256)(keccak256(abi.encodePacked(block.timestamp,msg.sender,tokenId)));
+        uint32 randL32 = uint32(rand & uint64(0x00000000FFFFFFFF));
+        uint32 randH32 = uint32((rand & uint64(0xFFFFFFFF00000000)) >> 64);
         // offset 0 undef
         // offset 1 type
         // offset 2 eyes
@@ -75,19 +77,19 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         // offset 5 head
         // offset 6 level
         // offset 7 stamina
-        uint64 dnaeye = uint64(rand % 1000);
+        uint64 dnaeye = randL32 % 1000;
         if (dnaeye <= 47)
-            dnaeye = uint64(rand & uint32(0x00FF0000));
+            dnaeye = uint64(randL32 & uint32(0x00FF0000));
         else
             dnaeye = 0;
-        uint64 dnabeak = uint64((rand * tokenId) % 1000);
+        uint64 dnabeak = (randH32 % 1000);
         if (dnabeak <= 7) dnabeak = ((3) << (3 * 8));
         else if (dnabeak <= 47) dnabeak = ((2) << (3 * 8));
         else if (dnabeak <= 500) dnabeak = ((1) << (3 * 8));
         else dnabeak = 0;        
-        uint64 dnathroat = uint64(rand & uint32(0x000000FF)) << (3 * 8);
-        uint64 dnahead = uint64(rand & uint32(0x0000FF00)) << (3 * 8);
-        uint64 dnatype = uint64((rand * block.timestamp) % 1000);
+        uint64 dnathroat = uint64(randL32 & uint32(0x000000FF)) << (3 * 8);
+        uint64 dnahead = uint64(randL32 & uint32(0x0000FF00)) << (3 * 8);
+        uint64 dnatype = uint64((randL32 + randH32) % 1000);
         if (dnatype <= 5) dnatype = ((4) << (1 * 8));
         else if (dnatype <= 40) dnatype = ((3) << (1 * 8));
         else if (dnatype <= 100) dnatype = ((2) << (1 * 8));
@@ -104,11 +106,14 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         uint64 oldvalue = TokenIdDNA[tokenId];
         uint64 TRAIT_MASK = 255;
         uint8[] memory traits = new uint8[](8);
-        for (uint256 i = 0; i < 8; i++) {
-            uint64 shift = uint64(8 * i);
-            uint64 bitMask = (TRAIT_MASK << shift);
-            uint64 value = ((oldvalue & bitMask) >> shift);
-            traits[i] = uint8(value);
+        for (uint256 i = 0; i < 8; ) {
+            unchecked {            
+                uint64 shift = uint64(8 * i);
+                uint64 bitMask = (TRAIT_MASK << shift);
+                uint64 value = ((oldvalue & bitMask) >> shift);
+                traits[i] = uint8(value);
+                i++;
+            }
         }
         return traits;
     }
@@ -142,12 +147,15 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         newvalue = newvalue << (8 * traitId);
         uint64 oldvalue = TokenIdDNA[tokenId];
         uint64 TRAIT_MASK = 255;
-        for (uint256 i = 0; i < 8; i++) {
-            if (i != traitId) {
-                uint64 shift = uint64(8 * i);
-                uint64 bitMask = TRAIT_MASK << shift;
-                uint64 value = (oldvalue & bitMask);
-                newvalue |= value;
+        for (uint256 i = 0; i < 8; ) {
+            unchecked {
+                if (i != traitId) {
+                    uint64 shift = uint64(8 * i);
+                    uint64 bitMask = TRAIT_MASK << shift;
+                    uint64 value = (oldvalue & bitMask);
+                    newvalue |= value;
+                }
+                i++;
             }
         }
         TokenIdDNA[tokenId] = newvalue;
