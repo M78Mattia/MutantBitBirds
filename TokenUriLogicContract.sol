@@ -162,7 +162,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function getRgbFromTraitVal(uint8 traitval)
-        internal
+        internal/*public*/
         pure
         returns (bytes memory)
     {
@@ -357,7 +357,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function generateCharacter(uint16 tokenId, uint16 ownedcount)
-        public //internal
+        internal/*public*/
         view
         returns (bytes memory)
     {
@@ -380,7 +380,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function getColorMapName(uint8 colourVal)
-        internal
+        internal/*public*/
         pure
         returns (bytes memory)
     {
@@ -434,7 +434,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function getTraitAttributesTType(uint8 traitId, uint8 traitVal)
-        internal
+        internal/*public*/
         pure
         returns (bytes memory)
     {
@@ -495,7 +495,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     }
 
     function getTraitAttributes(uint16 tokenId)
-        internal
+        internal/*public*/
         view
         returns (bytes memory)
     {
@@ -532,10 +532,11 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         returns (string memory)
     {
         uint256 id256 = tokenId;
+        bytes memory tokenNickName = bytes(MainContract.getNickName(tokenId));
         bytes memory dataURI = bytes.concat(
             "{"
             '"name": "',
-            ((bytes(MainContract.getNickName(tokenId)).length > 0) ? bytes(MainContract.getNickName(tokenId)) :  bytes("MBB")),
+            ((tokenNickName.length > 0) ? bytes(tokenNickName) :  bytes("MBB")),
             " #",
             bytes(id256.toString()),
             //' owned: ',
