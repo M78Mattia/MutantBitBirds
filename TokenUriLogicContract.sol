@@ -68,7 +68,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         require(msg.sender == address(MainContract));
         uint256 rand = (uint256)(keccak256(abi.encodePacked(block.timestamp,msg.sender,tokenId)));
         uint32 randL32 = uint32(rand & uint64(0x00000000FFFFFFFF));
-        uint32 randH32 = uint32((rand & uint64(0xFFFFFFFF00000000)) >> 64);
+        uint32 randH32 = (uint32)((rand & uint64(0xFFFFFFFF00000000)) >> 32);
         // offset 0 undef
         // offset 1 type
         // offset 2 eyes
@@ -87,9 +87,9 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         else if (dnabeak <= 47) dnabeak = ((2) << (3 * 8));
         else if (dnabeak <= 500) dnabeak = ((1) << (3 * 8));
         else dnabeak = 0;        
-        uint64 dnathroat = uint64(randL32 & uint32(0x000000FF)) << (3 * 8);
-        uint64 dnahead = uint64(randL32 & uint32(0x0000FF00)) << (3 * 8);
-        uint64 dnatype = uint64((randL32 + randH32) % 1000);
+        uint64 dnathroat = uint64(randL32 & uint32(0x000000FF)) << (4 * 8);
+        uint64 dnahead = uint64(randL32 & uint32(0x0000FF00)) << (4 * 8);
+        uint64 dnatype = uint64((uint64(randL32) + uint64(randH32)) % 1000);
         if (dnatype <= 5) dnatype = ((4) << (1 * 8));
         else if (dnatype <= 40) dnatype = ((3) << (1 * 8));
         else if (dnatype <= 100) dnatype = ((2) << (1 * 8));
@@ -332,7 +332,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         uint8[] memory traits = getTraitValues(tokenId);
         bytes memory eycolor = "rgb(0, 0, 0)";
         bytes memory ewcolor = "rgb(240,248,255)";
-        if (traits[2] == 1) {
+        if (traits[2] != 0) {
             eycolor = "rgb(154, 0, 0)";
             ewcolor = getRgbFromTraitVal(traits[2]);
         }
