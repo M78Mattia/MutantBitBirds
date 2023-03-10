@@ -560,6 +560,18 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
+    function toString(bytes memory data) internal pure returns(string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint i = 0; i < data.length; i++) {
+            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
+    }
+
     // Opensea json metadata format interface
     function contractURI() external view returns (string memory) {
         bytes memory dataURI = bytes.concat(
@@ -573,7 +585,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             //bytes(_contractUri),
             //'"',
             '"fee_recipient": "',
-            abi.encodePacked(MainContract.getRewardContract()),
+            bytes(toString(abi.encodePacked(MainContract.getRewardContract()))),
             '"'
             "}"
         );
