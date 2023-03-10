@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 interface IMainContract {
     
-    function getNickName(uint256 tokenId) external view returns (string memory);
+    function getNickName(uint16 tokenId) external view returns (string memory);
 
     function balanceOf(address account) external view returns (uint256);
 
