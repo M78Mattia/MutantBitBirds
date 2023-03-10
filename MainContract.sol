@@ -79,7 +79,7 @@ contract MutantBitBirds is
         //_pause();
     }
 
-    function getRewardContract() public pure returns (address) {
+    function getRewardContract() public pure override returns (address) {
         return RewardContract;
     }
 
@@ -342,7 +342,7 @@ contract MutantBitBirds is
     function withdraw(uint256 amount, uint32 tokenchoice)
         external
         /*payable*/
-        onlyOwner
+        //onlyOwner
     {
         uint256 balance = address(this).balance;
         require(amount < balance);
@@ -360,6 +360,7 @@ contract MutantBitBirds is
     function getNickName(uint16 tokenId)
         external
         view
+	override
         returns (string memory)
     {
         require(_exists(tokenId), "token err");
