@@ -1,5 +1,5 @@
 # MutantBitBirds
-Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits and a yield token for tokenomics.
+Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits and a related yield token for tokenomics.
 
 Experiment based on excellent Dabiri work!
 https://github.com/nft-fun
