@@ -16,10 +16,15 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     //string private _baseRevealedUri = "https://rubykitties.tk/kitties/";
     //string private _baseNotRevealedUri = "https://rubykitties.tk/kitties/";
     mapping(uint8 => TraitChangeCost) public TraitChangeCosts;    
-    mapping(uint16 => uint64) public TokenIdDNA;
+    address public PreviousTokenUriLogicContract;
+    uint16 CollectionImgTokenId;
+    string private _ContractUri;
+    mapping(uint16 => uint64) private _TokenIdDNA;    
 
     constructor(address maincontract) {
         MainContract = IMainContract(maincontract);
+        PreviousTokenUriLogicContract = address(0);
+        CollectionImgTokenId = 0;
         // setChageTraitPrice(uint8 traitId,
         //      bool allowed, uint32 changeCostEthMillis,
         //      uint32 increaseStepCostEthMillis, uint32 decreaseStepCostEthMillis,
@@ -34,13 +39,35 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         setChageTraitPrice(7, true, 0, 5 * 1000, 0, 0, 255); // stamina
     }
 
+    /*
     function cloneTokenUriLogic(address tokenUriLogic) external onlyOwner {
         uint16 i = 1;
         while (TokenUriLogicContract(tokenUriLogic).TokenIdDNA(i) > 0) {
             TokenIdDNA[i] = TokenUriLogicContract(tokenUriLogic).TokenIdDNA(i);
             i = i+1;
         }
+    }
+    */
+
+    function setCollectionImgTokenId(uint16 collectionImgTokenId) external onlyOwner {
+        CollectionImgTokenId = collectionImgTokenId;
     }    
+
+    function setPreviousTokenUriLogicContract(address previousTokenUriLogicContract) external onlyOwner {
+        PreviousTokenUriLogicContract = previousTokenUriLogicContract;
+    }  
+
+    function setContractUri(string calldata contractUri) external onlyOwner {
+        _ContractUri = contractUri;    
+    }  
+
+    function getTokenIdDNA(uint16 tokenId) public view returns(uint64)
+    {
+        uint64 res = _TokenIdDNA[tokenId];
+        if (res == 0 && PreviousTokenUriLogicContract != address(0))
+            res = TokenUriLogicContract(PreviousTokenUriLogicContract).getTokenIdDNA(tokenId);
+        return res;
+    }
 
     function setChageTraitPrice(
         uint8 traitId,
@@ -95,7 +122,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         else if (dnatype <= 100) dnatype = ((2) << (1 * 8));
         else if (dnatype <= 250) dnatype = ((1) << (1 * 8));
         else dnatype = 0;        
-        TokenIdDNA[tokenId] = (dnaeye + dnabeak + dnathroat + dnahead + dnatype);
+        _TokenIdDNA[tokenId] = (dnaeye + dnabeak + dnathroat + dnahead + dnatype);
     }
 
     function getTraitValues(uint16 tokenId)
@@ -103,7 +130,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         view
         returns (uint8[] memory)
     {
-        uint64 oldvalue = TokenIdDNA[tokenId];
+        uint64 oldvalue = getTokenIdDNA(tokenId);
         uint64 TRAIT_MASK = 255;
         uint8[] memory traits = new uint8[](8);
         for (uint256 i = 0; i < 8; ) {
@@ -145,7 +172,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         require(traitId < 8, "trait err");
         uint64 newvalue = traitValue;
         newvalue = newvalue << (8 * traitId);
-        uint64 oldvalue = TokenIdDNA[tokenId];
+        uint64 oldvalue = getTokenIdDNA(tokenId);
         uint64 TRAIT_MASK = 255;
         for (uint256 i = 0; i < 8; ) {
             unchecked {
@@ -158,7 +185,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
                 i++;
             }
         }
-        TokenIdDNA[tokenId] = newvalue;
+        _TokenIdDNA[tokenId] = newvalue;
     }
 
     function getRgbFromTraitVal(uint8 traitval)
@@ -356,13 +383,13 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             );
     }
 
-    function generateCharacter(uint16 tokenId, uint16 ownedcount)
+    function generateCharacter(uint16 tokenId, uint16 ownedcount, bool ignoreDayNigth)
         internal/*public*/
         view
         returns (bytes memory)
     {
         uint256 dayHour = (block.timestamp % 86400) / 3600;
-        bool isNight = ((dayHour >= 21) || (dayHour <= 4));
+        bool isNight = (ignoreDayNigth == false) && ((dayHour >= 21) || (dayHour <= 4));
         bytes memory svg = bytes.concat(
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<svg x="0px" y="0px" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" preserveAspectRatio="xMinYMin meet">',
@@ -544,7 +571,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             '",'
             '"description": "MutantBitBirds, Earn and Mutate",'
             '"image": "',
-            generateCharacter(tokenId, (uint16)(MainContract.balanceOf(tokenOwner))),
+            generateCharacter(tokenId, (uint16)(MainContract.balanceOf(tokenOwner)), false),
             '",'
             '"attributes": [',
             getTraitAttributes(tokenId),
@@ -574,6 +601,9 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
 
     // Opensea json metadata format interface
     function contractURI() external view returns (string memory) {
+        bytes memory c = bytes(_ContractUri);
+        if (c.length > 0)
+            return _ContractUri;
         bytes memory dataURI = bytes.concat(
             "{",
             '"name": "MutantBitBirds",',
@@ -581,9 +611,11 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             //'"image": "',
             //bytes(_contractUri),
             //'/image.png",',
+            '"image": "',
+            (CollectionImgTokenId == 0) ? bytes("") : generateCharacter(CollectionImgTokenId, 0, true),            
             //'"external_link": "',
             //bytes(_contractUri),
-            //'"',
+            '"',
             '"fee_recipient": "',
             bytes(toString(abi.encodePacked(MainContract.getRewardContract()))),
             '"'
