@@ -55,6 +55,7 @@ contract MutantBitBirds is
     uint256 public MintTokenPriceUsdc = 50000000000000000000; // 50 USDT
 
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
+    bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
     Counters.Counter private _tokenIdCounter;
     address public constant RewardContract = address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
     ERC20 private _tokenWEth = ERC20(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6); // goerli addr
@@ -538,6 +539,10 @@ contract MutantBitBirds is
         */
 
         if (interfaceId == _INTERFACE_ID_ERC2981) {
+            return true;
+        }
+
+        if (interfaceId == _INTERFACE_ID_ERC721_METADATA) {
             return true;
         }
 
