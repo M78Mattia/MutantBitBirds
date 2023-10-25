@@ -37,9 +37,9 @@ contract MutantBitBirds is
     address public BreedTokensContract = address(0);
     bool BreedTokensContractIsErc1155;
     bool public YieldTokenWithdrawalAllowed = false;
-    bool private FreeMintAllowed = false;
-    bool private PublicMintAllowed = false;
-    bool private BreedMintAllowed = false;
+    bool public FreeMintAllowed = false;
+    uint256 public PublicMintAllowedTime = 0;
+    uint256 public BreedMintAllowedTime = 0;
 
     mapping(address => uint16) public BreedAddressCount;
     mapping(uint256 => uint16) public BreedTokenIds;
@@ -51,8 +51,8 @@ contract MutantBitBirds is
     uint16 public CurrentPublicReserve;
     uint16 public MintMaxTotalBalance = 5;
     uint32 public NickNameChangePriceEthMillis = 100 * 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
-    uint256 public MintTokenPriceEth = 50000000000000000; // 0.050 ETH
-    uint256 public MintTokenPriceUsdc = 50000000000000000000; // 50 USDT
+    uint256 public MintTokenPriceEth = 125000000000000000; // 0.125 ETH
+    uint256 public MintTokenPriceUsdc = 250000000000000000000; // 250 USDT
 
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
     bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
@@ -123,15 +123,15 @@ contract MutantBitBirds is
 
     function setMintOptionsAllowed(
         bool freeMintAllowed,
-        bool breedMintAllowed,
-        bool publicMintAllowed
+        uint256 breedMintAllowedTime,
+        uint256 publicMintAllowedTime
     ) external onlyOwner {
         if (freeMintAllowed != FreeMintAllowed)
             FreeMintAllowed = freeMintAllowed;
-        if (breedMintAllowed != BreedMintAllowed)
-            BreedMintAllowed = breedMintAllowed;
-        if (publicMintAllowed != PublicMintAllowed)
-            PublicMintAllowed = publicMintAllowed;
+        if (breedMintAllowedTime != BreedMintAllowedTime)
+            BreedMintAllowedTime = breedMintAllowedTime;
+        if (publicMintAllowedTime != PublicMintAllowedTime)
+            PublicMintAllowedTime = publicMintAllowedTime;
     }
 
     // Opensea json metadata format interface
@@ -196,7 +196,8 @@ contract MutantBitBirds is
     */
 
     function breedMint(uint16 quantity, uint256[] calldata breedtokens) public {
-        require(BreedMintAllowed, "not allowed");
+        require(BreedMintAllowedTime > 0, "not allowed");
+	require(block.timestamp > BreedMintAllowedTime, "not started");
         require(BreedTokensContract != address(0), "no breed");
         require(quantity > 0, "cannot be zero");
         require(msg.sender == tx.origin, "no bots");
@@ -219,7 +220,8 @@ contract MutantBitBirds is
     }
 
     function publicMint(address user, uint16 quantity) internal {
-        require(PublicMintAllowed, "not allowed");
+        require(PublicMintAllowedTime > 0, "not allowed");
+	require(block.timestamp > PublicMintAllowedTime, "not started");
         require(quantity > 0, "cannot be zero");
         //require(msg.sender == tx.origin, "no bots");
         require(CurrentPublicReserve >= quantity);
@@ -236,9 +238,9 @@ contract MutantBitBirds is
         YieldToken.updateRewardOnMint(user, quantity);
     }
 
-    function publicMintFree() external {
+    function publicMintFree(uint16 quantity) external {
         require(FreeMintAllowed, "not allowed");
-        publicMint(msg.sender, 1);
+        publicMint(msg.sender, quantity);
     }
 
     function publicMintEth(uint16 quantity) external payable {
