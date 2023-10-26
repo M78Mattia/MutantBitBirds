@@ -35,7 +35,8 @@ contract MutantBitBirds is
     YieldTokenContract public YieldToken;
     TokenUriLogicContract public TokenUriLogic;
     address public BreedTokensContract = address(0);
-    bool BreedTokensContractIsErc1155;
+    address public BreedTokensOpenseaCreator = address(0);
+    bool public BreedTokensContractIsErc1155;
     bool public YieldTokenWithdrawalAllowed = false;
     bool public FreeMintAllowed = false;
     uint256 public PublicMintAllowedTime = 0;
@@ -117,12 +118,13 @@ contract MutantBitBirds is
         return YieldToken.getTotalClaimable(user);
     }
 
-    function setBreedTokensContract(address breedTokenContract, bool isErc1155)
+    function setBreedTokensContract(address breedTokensContract, bool isErc1155, address breedTokensOpenseaCreator)
         external
         onlyOwner
     {
-        BreedTokensContract = breedTokenContract;
+        BreedTokensContract = breedTokensContract;
         BreedTokensContractIsErc1155 = isErc1155;
+	BreedTokensOpenseaCreator = breedTokensOpenseaCreator;
     }
 
     function setMintOptionsAllowed(
@@ -171,24 +173,24 @@ contract MutantBitBirds is
     function walletHoldsBreedToken(uint256 breedTokenId, address wallet)
         public
         view
-        returns (bool)
-    {
-        if (BreedTokensContractIsErc1155) {
-            return IERC1155(BreedTokensContract).balanceOf(wallet, breedTokenId) > 0;
+        returns (bool) {
+        if (BreedTokensContractIsErc1155) 
+	    if (BreedTokensOpenseaCreator == address(0) || isValidBreedToken(breedTokenId))
+            	return IERC1155(BreedTokensContract).balanceOf(wallet, breedTokenId) > 0;
+	    return false;
         }
         else {
             return IERC721(BreedTokensContract).ownerOf(breedTokenId) == wallet;
         }
     }
 
-    /*
     function isValidBreedToken(uint256 id) view internal returns(bool) {
 		// making sure the ID fits the opensea format:
 		// first 20 bytes are the maker address
 		// next 7 bytes are the nft ID
 		// last 5 bytes the value associated to the ID, here will always be equal to 1
 		//if (id >> 96 != 0x000000000000000000000000a2548e7ad6cee01eeb19d49bedb359aea3d8ad1d)
-        if (id >> 96 != uint256(uint160(_breedTokensContract)))
+        	if (id >> 96 != uint256(uint160(BreedTokensOpenseaCreator)))
 			return false;
 		if (id & 0x000000000000000000000000000000000000000000000000000000ffffffffff != 1)
 			return false;
@@ -197,7 +199,6 @@ contract MutantBitBirds is
 		//	return false;
 		return true;
 	}
-    */
 
     function breedMint(uint16 quantity, uint256[] calldata breedtokens) public {
         require(BreedMintAllowedTime > 0, "not allowed");
