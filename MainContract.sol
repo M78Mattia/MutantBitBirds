@@ -36,7 +36,7 @@ contract MutantBitBirds is
     TokenUriLogicContract public TokenUriLogic;
     address public BreedTokensContract = address(0);
     address public BreedTokensOpenseaCreator = address(0);
-    bool public BreedTokensContractIsErc1155;
+    bool public BreedTokensContractIsErc1155 = false;
     bool public YieldTokenWithdrawalAllowed = false;
     bool public FreeMintAllowed = false;
     uint256 public PublicMintAllowedTime = 0;
