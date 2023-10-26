@@ -174,10 +174,11 @@ contract MutantBitBirds is
         public
         view
         returns (bool) {
-        if (BreedTokensContractIsErc1155) 
-	    if (BreedTokensOpenseaCreator == address(0) || isValidBreedToken(breedTokenId))
+        if (BreedTokensContractIsErc1155) {
+	        if (BreedTokensOpenseaCreator == address(0) || isValidBreedToken(breedTokenId)) {
             	return IERC1155(BreedTokensContract).balanceOf(wallet, breedTokenId) > 0;
-	    return false;
+            }
+	        return false;
         }
         else {
             return IERC721(BreedTokensContract).ownerOf(breedTokenId) == wallet;
