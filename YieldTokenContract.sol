@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -18,7 +18,7 @@ contract YieldTokenContract is ERC20, Ownable {
 
     event RewardPaid(address indexed user, uint256 reward);
 
-    constructor(address maincontract) ERC20("MutantCawSeed", "MCS") {
+    constructor(address maincontract) ERC20("MutantCawSeed", "MCS") Ownable(msg.sender) {
         MainContract = IMainContract(maincontract);
     }
 
