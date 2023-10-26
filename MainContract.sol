@@ -57,9 +57,15 @@ contract MutantBitBirds is
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
     bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
     Counters.Counter private _tokenIdCounter;
+
     address public constant RewardContract = address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
     ERC20 private _tokenWEth = ERC20(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6); // goerli addr
     ERC20 private _tokenUsdc = ERC20(0x2f3A40A3db8a7e3D09B0adfEfbCe4f6F81927557); // goerli addr
+    //weth eth   0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
+    //weth poly  0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619
+    //usdc eth   0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+    //usdc poly  0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359
+    //usdc (pos) 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
 
     //bool _mintAllowWEthPayment = true;
     //bool _mintAllowUsdtPayment = true;
@@ -244,6 +250,7 @@ contract MutantBitBirds is
     }
 
     function publicMintEth(uint16 quantity) external payable {
+	require(MintTokenPriceEth > 0, "not enabled");
         require(msg.value == quantity * MintTokenPriceEth, "wrong price");
         require(msg.sender == tx.origin, "no bots");
         publicMint(msg.sender, quantity);
@@ -260,6 +267,7 @@ contract MutantBitBirds is
 
     function publicMintWEth(uint16 quantity) external /*payable*/
     {
+	require(MintTokenPriceEth > 0, "not enabled");
         require(address(_tokenWEth) != address(0), "not enabled");
         require(msg.sender == tx.origin, "no bots");
         AcceptWEthPayment(msg.sender, quantity);
@@ -277,6 +285,7 @@ contract MutantBitBirds is
 
     function publicMintUsdc(uint16 quantity) external /*payable*/
     {
+	require(MintTokenPriceUsdc > 0, "not enabled");
         require(address(_tokenUsdc) != address(0), "not enabled");
         require(msg.sender == tx.origin, "no bots");
         AcceptUsdcPayment(msg.sender, quantity);
