@@ -81,7 +81,7 @@ contract MutantBitBirds is
         MaxBreedSupply = maxBreedSupply;
         CurrentPrivateReserve = reserveSupply;
         CurrentPublicReserve = MaxTotalSupply - reserveSupply - maxBreedSupply;
-        _setDefaultRoyalty(msg.sender, 850);
+        _setDefaultRoyalty(msg.sender, 500);
         //reserveMint(msg.sender, 1);
         //_pause();
     }
