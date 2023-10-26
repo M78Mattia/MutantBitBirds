@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.22;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+//import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "./Interfaces.sol";
 
@@ -21,7 +21,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
     string private _ContractUri;
     mapping(uint16 => uint64) private _TokenIdDNA;    
 
-    constructor(address maincontract) {
+    constructor(address maincontract)  Ownable(msg.sender) {
         MainContract = IMainContract(maincontract);
         PreviousTokenUriLogicContract = address(0);
         CollectionImgTokenId = 0;
