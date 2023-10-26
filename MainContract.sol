@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.22;
 
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -67,14 +67,12 @@ contract MutantBitBirds is
     //usdc poly  0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359
     //usdc (pos) 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174
 
-    //bool _mintAllowWEthPayment = true;
-    //bool _mintAllowUsdtPayment = true;
 
     constructor(
         uint16 maxTotalSupply,
         uint16 reserveSupply,
         uint16 maxBreedSupply
-    ) ERC721("MutantBitBirds", "MTB") {
+    ) ERC721("MutantBitBirds", "MTB") Ownable(msg.sender) {
         require(maxTotalSupply > 0, "err supply");
         require(reserveSupply + maxBreedSupply <= maxTotalSupply, "err reserve");
         MaxTotalSupply = maxTotalSupply;
@@ -86,7 +84,7 @@ contract MutantBitBirds is
         //_pause();
     }
 
-    function getRewardContract() public pure override returns (address) {
+    function getRewardContract() public pure returns (address) {
         return RewardContract;
     }
 
@@ -203,7 +201,7 @@ contract MutantBitBirds is
 
     function breedMint(uint16 quantity, uint256[] calldata breedtokens) public {
         require(BreedMintAllowedTime > 0, "not allowed");
-	require(block.timestamp > BreedMintAllowedTime, "not started");
+	    require(block.timestamp > BreedMintAllowedTime, "not started");
         require(BreedTokensContract != address(0), "no breed");
         require(quantity > 0, "cannot be zero");
         require(msg.sender == tx.origin, "no bots");
@@ -227,7 +225,7 @@ contract MutantBitBirds is
 
     function publicMint(address user, uint16 quantity) internal {
         require(PublicMintAllowedTime > 0, "not allowed");
-	require(block.timestamp > PublicMintAllowedTime, "not started");
+	    require(block.timestamp > PublicMintAllowedTime, "not started");
         require(quantity > 0, "cannot be zero");
         //require(msg.sender == tx.origin, "no bots");
         require(CurrentPublicReserve >= quantity);
@@ -250,7 +248,7 @@ contract MutantBitBirds is
     }
 
     function publicMintEth(uint16 quantity) external payable {
-	require(MintTokenPriceEth > 0, "not enabled");
+	    require(MintTokenPriceEth > 0, "not enabled");
         require(msg.value == quantity * MintTokenPriceEth, "wrong price");
         require(msg.sender == tx.origin, "no bots");
         publicMint(msg.sender, quantity);
@@ -265,9 +263,8 @@ contract MutantBitBirds is
         require(success, "Could not transfer token. Missing approval?");
     }
 
-    function publicMintWEth(uint16 quantity) external /*payable*/
-    {
-	require(MintTokenPriceEth > 0, "not enabled");
+    function publicMintWEth(uint16 quantity) external /*payable*/    {
+	    require(MintTokenPriceEth > 0, "not enabled");
         require(address(_tokenWEth) != address(0), "not enabled");
         require(msg.sender == tx.origin, "no bots");
         AcceptWEthPayment(msg.sender, quantity);
@@ -285,7 +282,7 @@ contract MutantBitBirds is
 
     function publicMintUsdc(uint16 quantity) external /*payable*/
     {
-	require(MintTokenPriceUsdc > 0, "not enabled");
+	    require(MintTokenPriceUsdc > 0, "not enabled");
         require(address(_tokenUsdc) != address(0), "not enabled");
         require(msg.sender == tx.origin, "no bots");
         AcceptUsdcPayment(msg.sender, quantity);
@@ -302,21 +299,7 @@ contract MutantBitBirds is
 
     function ownedCount(address account) external view returns (uint256) {
         return balanceOf(account);
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal override(ERC721, ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
-    }
-
-    function _burn(uint256 tokenId) internal override(ERC721) {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
-    }
+    }  
 
     function burnNFT(uint256 tokenId) external onlyOwner {
         _burn(tokenId);
@@ -372,10 +355,8 @@ contract MutantBitBirds is
     function getNickName(uint16 tokenId)
         external
         view
-	override
         returns (string memory)
     {
-        require(_exists(tokenId), "token err");
         return string(TokenIdNickName[tokenId]);
     }
 
@@ -426,7 +407,6 @@ contract MutantBitBirds is
     }
 
     function setNickName(uint16 tokenId, string calldata nickname) external {
-        require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         require(validateNickName(nickname), "refused");
         uint256 cost = NickNameChangePriceEthMillis;
@@ -439,7 +419,6 @@ contract MutantBitBirds is
         uint8 traitId,
         uint8 traitValue
     ) external {
-        require(_exists(tokenId), "token err");
         require(ownerOf(tokenId) == msg.sender, "no owner");
         TraitChangeCost memory tc = TokenUriLogic.getTraitCost(traitId);
         require(tc.allowed, "not allowed");
@@ -535,6 +514,23 @@ contract MutantBitBirds is
             to /*, tokenId*/
         );
         super.safeTransferFrom(from, to, tokenId, _data);
+    }
+
+
+    // The following functions are overrides required by Solidity.
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721, ERC721Enumerable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+
+    function _increaseBalance(address account, uint128 value)
+        internal
+        override(ERC721, ERC721Enumerable)
+    {
+        super._increaseBalance(account, value);
     }
 
     function supportsInterface(bytes4 interfaceId)
