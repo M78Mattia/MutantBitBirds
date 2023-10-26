@@ -49,7 +49,7 @@ contract MutantBitBirds is
     uint16 public CurrentBreedSupply = 0;
     uint16 public CurrentPrivateReserve;
     uint16 public CurrentPublicReserve;
-    uint16 public MintMaxTotalBalance = 5;
+    uint16 public MintMaxTotalBalance = 7;
     uint32 public NickNameChangePriceEthMillis = 100 * 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
     uint256 public MintTokenPriceEth = 125000000000000000; // 0.125 ETH
     uint256 public MintTokenPriceUsdc = 250000000000000000000; // 250 USDT
@@ -225,7 +225,7 @@ contract MutantBitBirds is
         require(quantity > 0, "cannot be zero");
         //require(msg.sender == tx.origin, "no bots");
         require(CurrentPublicReserve >= quantity);
-        require(balanceOf(user) - BreedAddressCount[user] + quantity <= MintMaxTotalBalance, "too many");
+        require(balanceOf(user) + quantity <= MintMaxTotalBalance * ((BreedAddressCount[user] > 0) ? 10 : 1), "too many");
         for (uint32 i = 0; i < quantity;) {
             internalMint(user);
             unchecked {
