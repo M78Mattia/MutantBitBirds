@@ -50,7 +50,7 @@ contract MutantBitBirds is
     uint16 public CurrentPrivateReserve;
     uint16 public CurrentPublicReserve;
     uint16 public MintMaxTotalBalance = 7;
-    uint32 public NickNameChangePriceEthMillis = 100 * 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
+    uint32 public NickNameChangePriceEthMillis = 150 * 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
     uint256 public MintTokenPriceEth = 125000000000000000; // 0.125 ETH
     uint256 public MintTokenPriceUsdc = 250000000000000000000; // 250 USDT
 
