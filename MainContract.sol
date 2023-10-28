@@ -59,7 +59,7 @@ contract MutantBitBirds is
     bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
     Counters.Counter private _tokenIdCounter;
 
-    address public constant RewardContract = address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
+    address private _rewardContract = address(0xE8aF6d7e77f5D9953d99822812DCe227551df1D7);
     ERC20 private _tokenWEth = ERC20(0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6); // goerli addr
     ERC20 private _tokenUsdc = ERC20(0x2f3A40A3db8a7e3D09B0adfEfbCe4f6F81927557); // goerli addr
     //weth eth   0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2
@@ -85,8 +85,8 @@ contract MutantBitBirds is
         //_pause();
     }
 
-    function getRewardContract() public pure returns (address) {
-        return RewardContract;
+    function setRewardContract(address) external onlyOwner {
+        _rewardContract = rewardContract;
     }
 
     function setTokenUriLogic(address tokenUriLogic) external onlyOwner {
@@ -345,11 +345,11 @@ contract MutantBitBirds is
         require(amount < balance);
         bool success;
         if (tokenchoice == 1) {
-            success = _tokenWEth.transfer(RewardContract, amount);
+            success = _tokenWEth.transfer(_rewardContract, amount);
         } else if (tokenchoice == 2) {
-            success = _tokenUsdc.transfer(RewardContract, amount);
+            success = _tokenUsdc.transfer(_rewardContract, amount);
         } else {
-            (success, ) = payable(/*msg.sender*/RewardContract).call{value: amount}("");
+            (success, ) = payable(/*msg.sender*/_rewardContract).call{value: amount}("");
         }
         require(success, "Failed to send Ether");
     }
