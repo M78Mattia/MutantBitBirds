@@ -342,7 +342,7 @@ contract MutantBitBirds is
         //onlyOwner
     {
         uint256 balance = address(this).balance;
-        require(amount < balance);
+        require(amount <= balance);
         bool success;
         if (tokenchoice == 1) {
             success = _tokenWEth.transfer(_rewardContract, amount);
