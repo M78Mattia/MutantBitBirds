@@ -604,6 +604,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
         bytes memory c = bytes(_ContractUri);
         if (c.length > 0)
             return _ContractUri;
+        uint16 ctid = ((CollectionImgTokenId == 0) ? ((_TokenIdDNA[1] > 0) ? 1 : 0) : CollectionImgTokenId);
         bytes memory dataURI = bytes.concat(
             "{",
             '"name": "MutantBitBirds",',
@@ -612,7 +613,7 @@ contract TokenUriLogicContract is Ownable, ITraitChangeCost {
             //bytes(_contractUri),
             //'/image.png",',
             '"image": "',
-            (CollectionImgTokenId == 0) ? bytes("") : generateCharacter(CollectionImgTokenId, 0, true),            
+            (ctid == 0) ? bytes("") : generateCharacter(ctid, 0, true),            
             //'"external_link": "',
             //bytes(_contractUri),
             '"',
