@@ -85,6 +85,10 @@ contract MutantBitBirds is
         //_pause();
     }
 
+    function getRewardContract() external view returns (address) {
+        return _rewardContract;
+    }
+
     function setRewardContract(address rewardContract) external onlyOwner {
         _rewardContract = rewardContract;
     }
