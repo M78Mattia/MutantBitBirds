@@ -1,6 +1,8 @@
 # MutantBitBirds
 Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits and a related yield token for tokenomics.
-
+<br />Finally deployed on Polygon
+https://rubykitties.net/polygonBitBirds.html
+<br />
 Experiment based on excellent Dabiri work!
 https://github.com/nft-fun
 
@@ -22,9 +24,9 @@ Set TokenUriLogicContract address on the deployed MainContract (setTokenUriLogic
 
 This is a first draft of a mintable NFT with on-chain traits.
 
-The first dynamic MutantBitBird's svg is actually flying on goerli testnet !
+The first dynamic MutantBitBird's svg is finally flying on Polygon as PolygonBitBird(PBB) !
 
-Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-3
+Previous test on Opensea:  https://testnets.opensea.io/collection/mutantbitbirds-3
 
 ---------------------------------------------------------------------------------------------
 Tokenomics 
@@ -35,19 +37,9 @@ Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, 
 
 Already deployed on groeli testnet at:
 
-0xb5adA6C70a1f497Fee69Fa5906BCAAe4DAe0Af28 (MutantBitBirds MBB)<br />
-https://goerli.etherscan.io/address/0xb5adA6C70a1f497Fee69Fa5906BCAAe4DAe0Af28#readContract<br />
+0xb5adA6C70a1f497Fee69Fa5906BCAAe4DAe0Af28 (PolygonBitBirds PBB)<br />
+https://polygonscan.com/address/0x73c4d9d23a7df31351dc6ee8f2276414c76ea8f6#readContract<br />
 <br />
-0xBA2b0daED2dfaC14489524ac771C5F43F04F8d95 (MutantCawSeed MCS)<br />
-https://goerli.etherscan.io/address/0xBA2b0daED2dfaC14489524ac771C5F43F04F8d95#readContract
-<br />
-0x948e431375f76c33de8cBbf0649adA3605851FE9 (TokeUri Logic)<br />
-https://goerli.etherscan.io/address/0x948e431375f76c33de8cBbf0649adA3605851FE9#readContract
 
 -----------------------------------------------------------------------------
 
-Test page here (wip):
-https://rubykitties.net/bitBirds.html
-
-Previous build:
-0x7Cc5b6d10071cc2E13e74955786b038A0D64d075
