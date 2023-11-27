@@ -1,6 +1,6 @@
 # MutantBitBirds
 Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits and a related yield token for tokenomics.
-<br />Finally deployed on Polygon
+<br /><br />Finally deployed on Polygon
 https://rubykitties.net/polygonBitBirds.html
 <br />
 Experiment based on excellent Dabiri work!
@@ -37,7 +37,7 @@ Spend earned MCS tokens to 'evolve' yours MBB NFTs (change the on-chain traits, 
 
 Already deployed on groeli testnet at:
 
-0xb5adA6C70a1f497Fee69Fa5906BCAAe4DAe0Af28 (PolygonBitBirds PBB)<br />
+0x73C4D9D23a7Df31351dc6EE8f2276414c76eA8F6 (PolygonBitBirds PBB)<br />
 https://polygonscan.com/address/0x73c4d9d23a7df31351dc6ee8f2276414c76ea8f6#readContract<br />
 <br />
 
