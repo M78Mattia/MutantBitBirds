@@ -3,6 +3,8 @@ Solidity Contract: mintable NFTs having on-chain 'mutable' DNA traits and a rela
 <br /><br />Finally deployed on Polygon
 https://rubykitties.net/polygonBitBirds.html
 <br />
+https://opensea.io/collection/polygonbitbirds
+<br />
 Experiment based on excellent Dabiri work!
 https://github.com/nft-fun
 
