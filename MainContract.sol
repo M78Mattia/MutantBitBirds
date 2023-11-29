@@ -52,8 +52,9 @@ contract MutantBitBirds is
     uint16 public CurrentPublicReserve;
     uint16 public MintMaxTotalBalance = 7;
     uint32 public NickNameChangePriceEthMillis = 150 * 1000; // 100 eth-yield tokens (1000 == 1 eth-yield)
-    uint256 public MintTokenPriceEth = 125000000000000000; // 0.125 ETH
-    uint256 public MintTokenPriceUsdc = 250000000000000000000; // 250 USDT
+    uint256 public MintTokenPrice = 10000000000000000; // 0.01 ETH     
+    uint256 public MintTokenPriceWEth = 10000000000000000; // 0.01 ETH
+    uint256 public MintTokenPriceUsdc = 20000000000000000000; // 20 USDT
 
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
     bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
@@ -253,9 +254,9 @@ contract MutantBitBirds is
         publicMint(msg.sender, quantity);
     }
 
-    function publicMintEth(uint16 quantity) external payable {
-	    require(MintTokenPriceEth > 0, "not enabled");
-        require(msg.value == quantity * MintTokenPriceEth, "wrong price");
+    function publicMintNative(uint16 quantity) external payable {
+	    require(MintTokenPrice > 0, "not enabled");
+        require(msg.value == quantity * MintTokenPrice, "wrong price");
         require(msg.sender == tx.origin, "no bots");
         publicMint(msg.sender, quantity);
     }
@@ -264,13 +265,13 @@ contract MutantBitBirds is
         bool success = _tokenWEth.transferFrom(
             user,
             address(this),
-            quantity * MintTokenPriceEth
+            quantity * MintTokenPriceWEth
         );
         require(success, "Could not transfer token. Missing approval?");
     }
 
     function publicMintWEth(uint16 quantity) external /*payable*/    {
-	    require(MintTokenPriceEth > 0, "not enabled");
+	    require(MintTokenPriceWEth > 0, "not enabled");
         require(address(_tokenWEth) != address(0), "not enabled");
         require(msg.sender == tx.origin, "no bots");
         AcceptWEthPayment(msg.sender, quantity);
@@ -311,23 +312,19 @@ contract MutantBitBirds is
         _burn(tokenId);
     }
 
-    function setMintTokenPriceEth(uint256 mintTokenPriceEth)
+    function setMintTokenPrice(uint256 mintTokenPrice, uint256 mintTokenPriceWEth, uint256 mintTokenPriceUsdc)
         external
         onlyOwner
     {
-        MintTokenPriceEth = mintTokenPriceEth;
+        MintTokenPrice = mintTokenPrice;
+        MintTokenPriceWEth = mintTokenPriceWEth;
+        MintTokenPriceUsdc = mintTokenPriceUsdc;
     }
 
     function setMintTokenWEth(address contractAddress) external onlyOwner {
         _tokenWEth = ERC20(contractAddress);
     }
 
-    function setMintTokenPriceUsdc(uint256 mintTokenPriceUsdc)
-        external
-        onlyOwner
-    {
-        MintTokenPriceUsdc = mintTokenPriceUsdc;
-    }
 
     function setMintTokenUsdc(address contractAddress) external onlyOwner {
         _tokenUsdc = ERC20(contractAddress);
@@ -413,10 +410,13 @@ contract MutantBitBirds is
     }
 
     function setNickName(uint16 tokenId, string calldata nickname) external {
-        require(ownerOf(tokenId) == msg.sender, "no owner");
+        require(ownerOf(tokenId) == msg.sender || (msg.sender == owner(), "no owner");
         require(validateNickName(nickname), "refused");
-        uint256 cost = NickNameChangePriceEthMillis;
-        spendYieldTokens(msg.sender, (cost * 1000000000000000));
+	if (ownerOf(tokenId) == msg.sender)
+	{
+        	uint256 cost = NickNameChangePriceEthMillis;
+        	spendYieldTokens(msg.sender, (cost * 1000000000000000));
+	}
         TokenIdNickName[tokenId] = nickname;
     }
 
